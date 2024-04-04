@@ -1,15 +1,15 @@
 import pandas as pd
 
-# Chargement du fichier CSV
-df = pd.read_csv('chemin/vers/votre/fichier.csv')
+# Load the CSV file
+df = pd.read_csv('path/to/your/file.csv')
 
-# Liste des noms de colonnes à supprimer
-colonnes_a_supprimer = ['nom_colonne1', 'nom_colonne2']  # Modifiez ceci selon vos besoins
+# List of column names to keep
+columns_to_keep = ['column_name1', 'column_name2']  # Modify this according to your needs
 
-# Suppression des colonnes
-df_modifie = df.drop(columns=colonnes_a_supprimer)
+# Select the columns to keep
+df_kept = df[columns_to_keep]
 
-# Enregistrement du DataFrame modifié dans un nouveau fichier CSV
-df_modifie.to_csv('chemin/vers/votre/nouveau_fichier.csv', index=False)
+# Save the reduced DataFrame to a new CSV file
+df_kept.to_csv('path/to/your/new_file_kept.csv', index=False)
 
-print(f"Le fichier a été enregistré avec succès sans les colonnes : {', '.join(colonnes_a_supprimer)}")
+print(f"The file has been successfully saved, keeping only the columns: {', '.join(columns_to_keep)}")
