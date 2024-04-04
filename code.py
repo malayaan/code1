@@ -1,21 +1,19 @@
 import pandas as pd
 
-# Define the function to add missing seconds
-def add_seconds_if_missing(time_str):
-    if len(time_str.split(':')) == 2:
-        return time_str + ':00'
-    return time_str
-
 # Load the data
 df = pd.read_csv('path_to_your_file.csv')
 
-# Apply the function to 'Start_Time' and 'End_Time' before converting to datetime
-df['Start_Time'] = df['Start_Time'].apply(add_seconds_if_missing)
-df['End_Time'] = df['End_Time'].apply(add_seconds_if_missing)
+# Attempt to convert time columns to datetime, coercing errors to NaT
+df['Start_Time'] = pd.to_datetime(df['Start_Time'], errors='coerce')
+df['End_Time'] = pd.to_datetime(df['End_Time'], errors='coerce')
 
-# Now convert time columns to datetime
-df['Start_Time'] = pd.to_datetime(df['Start_Time'])
-df['End_Time'] = pd.to_datetime(df['End_Time'])
+# Find rows where the datetime conversion failed (where NaT is present)
+invalid_start_times = df[df['Start_Time'].isna()]
+invalid_end_times = df[df['End_Time'].isna()]
 
-# The rest of your code for analysis
-# ...
+# Display the problematic rows
+print("Rows with invalid Start_Time:")
+print(invalid_start_times)
+
+print("\nRows with invalid End_Time:")
+print(invalid_end_times)
