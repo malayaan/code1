@@ -1,15 +1,25 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
-# Load the CSV file
-df = pd.read_csv('path/to/your/file.csv')
+# Charger les données
+df = pd.read_csv('chemin_vers_votre_fichier.csv')
 
-# List of column names to keep
-columns_to_keep = ['column_name1', 'column_name2']  # Modify this according to your needs
+# Convertir les colonnes de temps en datetime
+df['Start_Time'] = pd.to_datetime(df['Start_Time'])
+df['End_Time'] = pd.to_datetime(df['End_Time'])
 
-# Select the columns to keep
-df_kept = df[columns_to_keep]
+# Créer une nouvelle colonne 'Hour' basée sur l'heure de début du problème
+df['Hour'] = df['Start_Time'].dt.hour
 
-# Save the reduced DataFrame to a new CSV file
-df_kept.to_csv('path/to/your/new_file_kept.csv', index=False)
+# Analyser les problèmes informatiques par plage horaire
+hourly_issues = df.groupby('Hour').size()
 
-print(f"The file has been successfully saved, keeping only the columns: {', '.join(columns_to_keep)}")
+# Visualiser les résultats
+plt.figure(figsize=(10, 6))
+hourly_issues.plot(kind='bar')
+plt.title('Nombre de problèmes informatiques par heure')
+plt.xlabel('Heure')
+plt.ylabel('Nombre de problèmes')
+plt.xticks(rotation=45)
+plt.grid(axis='y')
+plt.show()
