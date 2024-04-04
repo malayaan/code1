@@ -1,18 +1,28 @@
-# Count the number of IT issues including those with NaN hours
-hourly_issues = df.groupby('Hour').size()
+import pandas as pd
 
-# To count the issues marked as NaN in 'Hour', we can use
-nan_issues_count = df['Hour'].isna().sum()
+def load_and_filter_data(file_path):
+    # Charger les données
+    df = pd.read_csv(file_path)
+    
+    # Convertir les colonnes de temps, en marquant les erreurs comme NaN
+    df['Start_Time'] = pd.to_datetime(df['Start_Time'], errors='coerce')
+    df['End_Time'] = pd.to_datetime(df['End_Time'], errors='coerce')
+    
+    # Identifier les lignes avec des données de temps problématiques
+    problematic_rows = df[df['Start_Time'].isna() | df['End_Time'].isna()]
+    
+    return problematic_rows
 
-# Visualize the results, excluding NaN values for a clearer histogram
-plt.figure(figsize=(10, 6))
-hourly_issues.dropna().plot(kind='bar')  # Drop NaN to avoid plotting error
-plt.title('Number of IT Issues by Hour (excluding incorrect data)')
-plt.xlabel('Hour')
-plt.ylabel('Number of Issues')
-plt.xticks(rotation=45)
-plt.grid(axis='y')
-plt.show()
+# Chemin vers votre fichier CSV
+file_path = 'path_to_your_file.csv'
 
-# Output the number of problematic cases
-print(f"Number of cases with incorrect data: {nan_issues_count}")
+# Appeler la fonction et récupérer les lignes problématiques
+problematic_data = load_and_filter_data(file_path)
+
+# Afficher les lignes problématiques
+if not problematic_data.empty:
+    print("Problematic rows with incorrect time data:")
+    print(problematic_data)
+else:
+    print("No problematic time data found in the file.")
+
