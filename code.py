@@ -1,8 +1,3 @@
-import pandas as pd
+Sur la base de ça, je vais cleaner mes données. Et pour simplifier mes individus, je vais supprimer des variables dans les individus. Je vais supprimer toutes les portfolios qui se hedgent bien en termes de métrique de risque au sein d'un groupe de portfolio. En considérant que c'est un groupe de portfolio indépendant qui ne présente pas de potentiel problème parce qu'il est équilibré en termes de risque. Suite à ça mes individus seront là données de plusieurs portfolio pour les quelles j'aurais les variations de 5 métriques sur les 5 derniers jours. De même je vais virer des portfolio restant les combinaisons de deux ou trois qui se compensent presque parfaitement.  De meme je vais virer les GoP qui se compensent presque parfaitment pat groupe de deux ou trois A la fin il reste donc les portfolio du desk dont les variations ne se composent pas de façon directement visible.
 
-# Chargement du fichier CSV
-df = pd.read_csv('chemin/vers/votre/fichier.csv')
-
-# Calcul et affichage du nombre de NaN par colonne
-nan_par_colonne = df.isna().sum()
-print(nan_par_colonne)
+Chaque individu est donc la donnée des variations des conso pour chaque metric sur 5jours qui ne s'expliquent pas par de bête compensation de edging.
