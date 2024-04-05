@@ -1,34 +1,3 @@
-import pandas as pd
-import matplotlib.pyplot as plt
+In this initial phase of our analysis focusing on booking incidents, it has become apparent that the issue predominantly does not reside at the portfolio level within the analytical structure; this is evidenced by the significant number of NaN values observed in this column. Interestingly, the data also reveals that the 'trading desk' field is left unfilled approximately 400 times, which contrasts sharply with the 'PC' level, where only about 50 instances of missing information are noted. This finding is particularly surprising considering that PCs are positioned lower in the analytical hierarchy, suggesting that the issue's localization might defy initial expectations regarding the structural flow of information. Similarly, a noteworthy discrepancy is observed when comparing the 'GOP' level to the 'trading desk', with the former being less frequently unreported despite its hierarchical positioning.
 
-# Load the CSV file
-df = pd.read_csv('path/to/your/file.csv')
-
-# List of columns to analyze
-columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
-
-# Basic configuration for the plots
-plt.figure(figsize=(10, 6 * len(columns)))
-
-for i, col in enumerate(columns, 1):
-    plt.subplot(len(columns), 1, i)
-    # Calculate frequencies, including NaN values
-    frequencies = df[col].value_counts(dropna=False)
-    
-    # Check if NaN values are present, and add them manually if they're not automatically included
-    if frequencies.index.isnull().any():
-        nan_count = df[col].isna().sum()
-        frequencies['NaN'] = nan_count
-    
-    # Limit to the 20 most frequent items, including NaN values if applicable
-    frequencies = frequencies.head(20)
-
-    frequencies.plot(kind='bar', color='skyblue')
-    
-    plt.title(f'Frequencies of the 20 most frequent items in column {col} (including NaN)')
-    plt.ylabel('Frequency')
-    plt.xlabel('Item')
-
-# Adjust the plots to avoid overlap
-plt.tight_layout()
-plt.show()
+Furthermore, an examination of the data related to 'grppc200' and 'grppc300' indicates a complete overlap, leading to the preliminary conclusion that one of these columns might be redundant. This observation suggests a potential area for data optimization, highlighting the importance of reevaluating the necessity and utility of these columns in our dataset. The findings from this part of the analysis underscore the complexity of incident distribution within the booking process, offering valuable insights into how data quality incidents might be better characterized and understood.
