@@ -1,23 +1,21 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Remplacez ceci par le chemin vers votre fichier CSV
-chemin_du_fichier = 'chemin_vers_votre_fichier.csv'
+# Charger les données
+df = pd.read_csv('dfbk.csv')  # Remplacez 'dfbk.csv' par le chemin vers votre fichier
 
-# Charger le CSV
-df = pd.read_csv(chemin_du_fichier)
+# Nettoyer les données : supprimer les espaces superflus et séparer les métriques
+metrics_list = df['ScopeOfData'].str.replace(" ", "").str.split(';')
 
-# Assurez-vous de remplacer 'nom_colonne_date' par le nom réel de votre colonne de dates
-df['nom_colonne_date'] = pd.to_datetime(df['nom_colonne_date'])
+# Compter les occurrences de chaque métrique
+metrics_count = pd.Series([metric for sublist in metrics_list.dropna() for metric in sublist]).value_counts()
 
-# Grouper par jour et compter le nombre d'incidents
-df_grouped = df.groupby(pd.Grouper(key='nom_colonne_date', freq='D')).size()
-
-# Visualiser le résultat
-plt.figure(figsize=(12, 6))
-df_grouped.plot(kind='line')
-plt.title('Nombre d\'incidents par jour')
-plt.xlabel('Date')
-plt.ylabel('Nombre d\'incidents')
-plt.grid(True)
+# Visualiser les résultats
+plt.figure(figsize=(12, 8))
+metrics_count.plot(kind='bar')
+plt.title('Nombre d\'occurrences par métrique')
+plt.xlabel('Métrique')
+plt.ylabel('Nombre d\'occurrences')
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
 plt.show()
