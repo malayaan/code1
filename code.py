@@ -1,13 +1,23 @@
-Objet : Ton expertise pour cerner les variables clés ?
+import pandas as pd
+import matplotlib.pyplot as plt
 
-Salut [Prénom de l'analyste],
+# Remplacez ceci par le chemin vers votre fichier CSV
+chemin_du_fichier = 'chemin_vers_votre_fichier.csv'
 
-C’est [Ton Prénom], le stagiaire qui s’est lancé dans l’aventure data. J’ai besoin de piger comment tu repères les anomalies dans les données et comment tu décides si elles concernent le Booking, le Référentiel ou l'IT.
+# Charger le CSV
+df = pd.read_csv(chemin_du_fichier)
 
-En gros, je dois identifier les éléments que tu examines pour déterminer la nature d'un problème. C’est pour ça que je veux définir avec toi les variables essentielles qui aideront à classer ces cas automatiquement. Si t’as un moment pour partager ta méthode, ça pourrait vraiment booster le projet.
+# Assurez-vous de remplacer 'nom_colonne_date' par le nom réel de votre colonne de dates
+df['nom_colonne_date'] = pd.to_datetime(df['nom_colonne_date'])
 
-Merci et dis-moi quand t’aurais un créneau pour qu’on en parle.
+# Grouper par jour et compter le nombre d'incidents
+df_grouped = df.groupby(pd.Grouper(key='nom_colonne_date', freq='D')).size()
 
-A+,
-
-[Ton Prénom]
+# Visualiser le résultat
+plt.figure(figsize=(12, 6))
+df_grouped.plot(kind='line')
+plt.title('Nombre d\'incidents par jour')
+plt.xlabel('Date')
+plt.ylabel('Nombre d\'incidents')
+plt.grid(True)
+plt.show()
