@@ -1,28 +1,32 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 
-# Load the data
-df = pd.read_csv('dfbk.csv')  # Replace 'dfbk.csv' with the path to your file
+# Simulating the original DataFrame structure
+data = [
+    ["age: 14", "height: 42", None, None],
+    ["age:55", "height : 78", "gender: female", None],
+    ["age : 56", "height : 55", "gender: male", "study: yes"]
+]
 
-# Clean the data: remove extra spaces and split the metrics
-metrics_list = df['ScopeOfData'].str.replace(" ", "").str.split(';')
+# Creating the DataFrame
+df = pd.DataFrame(data, columns=["col1", "col2", "col3", "col4"])
 
-# Count the occurrences of each metric
-metrics_count = pd.Series([metric for sublist in metrics_list.dropna() for metric in sublist]).value_counts()
+# Function to transform a row into a dictionary
+def row_to_dict(row):
+    row_dict = {}
+    for item in row:
+        if pd.notna(item):
+            key, value = item.split(":")
+            row_dict[key.strip()] = value.strip() if value.strip() else None
+    return row_dict
 
-# Print the most occurring metric and its count
-most_occurring_metric = metrics_count.idxmax()
-print(f"The most occurring metric is '{most_occurring_metric}' with {metrics_count.max()} occurrences.")
+# Apply the function to each row and create a list of dictionaries
+dict_rows = [row_to_dict(row) for index, row in df.iterrows()]
 
-# Exclude the most occurring metric from the plot
-metrics_count_excl_most_occurring = metrics_count.drop(index=most_occurring_metric)
+# Determine the column order based on the row with the most elements
+longest_row = max(dict_rows, key=lambda x: len(x))
+column_order = list(longest_row.keys())
 
-# Visualize the results, excluding the most occurring metric
-plt.figure(figsize=(12, 8))
-metrics_count_excl_most_occurring.plot(kind='bar')
-plt.title('Number of Occurrences per Metric (Excluding the Most Occurring)')
-plt.xlabel('Metric')
-plt.ylabel('Number of Occurrences')
-plt.xticks(rotation=45, ha='right')
-plt.tight_layout()
-plt.show()
+# Create the new DataFrame with the specified column order
+new_df = pd.DataFrame(dict_rows).reindex(columns=column_order)
+
+new_df
