@@ -1,29 +1,25 @@
-import pandas as pd
-import ast
-from collections import Counter
+import matplotlib.pyplot as plt
 
-# Charger le fichier CSV
-df = pd.read_csv('chemin_du_fichier.csv')
+# Supposons que 'column_usage_counts' est votre dictionnaire de comptage de colonnes
+column_usage_counts = {'très_long_nom_de_colonne_1': 10, 'nom_de_colonne_2': 15, 'autre_colonne_avec_nom_long': 7}
 
-# Fonction pour convertir la string formatée en liste
-def convert_string_to_list(string):
-    try:
-        return ast.literal_eval(string)
-    except ValueError:
-        return []
+# Créer les données pour le graphique
+labels, values = zip(*column_usage_counts.items())
 
-# Appliquer la fonction à la colonne 'Rowgroup'
-df['Rowgroup'] = df['Rowgroup'].apply(convert_string_to_list)
+# Créer le graphique à barres
+fig, ax = plt.subplots()
+bars = ax.bar(labels, values)
 
-# Extraire toutes les colonnes utilisées dans une liste unique
-all_columns_used = [column for sublist in df['Rowgroup'] for column in sublist]
+# Rotation des étiquettes sur l'axe des x
+ax.set_xticklabels(labels, rotation=45, ha='right')  # Rotation de 45 degrés et alignement à droite
 
-# Utiliser Counter pour compter les occurrences de chaque colonne
-column_usage_counts = Counter(all_columns_used)
+# Ajuster l'espacement pour s'assurer que tout est lisible
+plt.subplots_adjust(bottom=0.25)  # Ajuste le bas pour donner plus d'espace
 
-# Afficher les colonnes les plus fréquentes et leurs comptes
-for column, count in column_usage_counts.most_common():
-    print(f'Colonne: {column}, Occurrences: {count}')
+# Ajouter des titres et étiquettes
+plt.title('Usage des Colonnes')
+plt.xlabel('Colonnes')
+plt.ylabel('Occurrences')
 
-# Afficher également les statistiques générales
-print(f'Total de colonnes uniques utilisées: {len(column_usage_counts)}')
+# Montrer le graphique
+plt.show()
