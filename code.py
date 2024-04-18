@@ -1,25 +1,19 @@
-import matplotlib.pyplot as plt
+import pandas as pd
 
-# Supposons que 'column_usage_counts' est votre dictionnaire de comptage de colonnes
-column_usage_counts = {'très_long_nom_de_colonne_1': 10, 'nom_de_colonne_2': 15, 'autre_colonne_avec_nom_long': 7}
+# Supposons que 'Date', 'Périmètre', et 'Type' sont les noms finaux des colonnes que vous voulez
+# Remplacez 'IncidentDate', 'GRPPC200', et 'type' par les noms réels des colonnes dans vos dataframes
 
-# Créer les données pour le graphique
-labels, values = zip(*column_usage_counts.items())
+# Étape 1 et 2: Filtrer et renommer les colonnes
+dfit_filtered = dfit[['IncidentDate', 'GRPPC200']].rename(columns={'IncidentDate': 'Date', 'GRPPC200': 'Périmètre'})
+dfbk_filtered = dfbk[['ValueDate', 'GRPPC200']].rename(columns={'ValueDate': 'Date', 'GRPPC200': 'Périmètre'})
+dfrf_filtered = dfrf[['WMGSADate', 'GRPPC200']].rename(columns={'WMGSADate': 'Date', 'GRPPC200': 'Périmètre'})
 
-# Créer le graphique à barres
-fig, ax = plt.subplots()
-bars = ax.bar(labels, values)
+# Étape 3: Ajouter une colonne 'Type'
+dfit_filtered['Type'] = 'IT'
+dfbk_filtered['Type'] = 'BOOKING'
+dfrf_filtered['Type'] = 'REFERENTIAL'
 
-# Rotation des étiquettes sur l'axe des x
-ax.set_xticklabels(labels, rotation=45, ha='right')  # Rotation de 45 degrés et alignement à droite
+# Étape 4: Concaténer les dataframes
+df_final = pd.concat([dfit_filtered, dfbk_filtered, dfrf_filtered], ignore_index=True)
 
-# Ajuster l'espacement pour s'assurer que tout est lisible
-plt.subplots_adjust(bottom=0.25)  # Ajuste le bas pour donner plus d'espace
-
-# Ajouter des titres et étiquettes
-plt.title('Usage des Colonnes')
-plt.xlabel('Colonnes')
-plt.ylabel('Occurrences')
-
-# Montrer le graphique
-plt.show()
+# Maintenant, df_final devrait contenir vos données concaténées
