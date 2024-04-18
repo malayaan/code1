@@ -1,19 +1,37 @@
 import pandas as pd
 
-# Supposons que 'Date', 'Périmètre', et 'Type' sont les noms finaux des colonnes que vous voulez
-# Remplacez 'IncidentDate', 'GRPPC200', et 'type' par les noms réels des colonnes dans vos dataframes
+# Lecture des fichiers CSV
+dfit = pd.read_csv('dataframes/Unity_it_clean.csv')
+dfbk = pd.read_csv('dataframes/SGWorkflow_booking_clean.csv')
+dfrf = pd.read_csv('dataframes/SGWorkflow_referential_clean.csv')
 
-# Étape 1 et 2: Filtrer et renommer les colonnes
-dfit_filtered = dfit[['IncidentDate', 'GRPPC200']].rename(columns={'IncidentDate': 'Date', 'GRPPC200': 'Périmètre'})
-dfbk_filtered = dfbk[['ValueDate', 'GRPPC200']].rename(columns={'ValueDate': 'Date', 'GRPPC200': 'Périmètre'})
-dfrf_filtered = dfrf[['WMGSADate', 'GRPPC200']].rename(columns={'WMGSADate': 'Date', 'GRPPC200': 'Périmètre'})
+# Filtre basé sur les conditions spécifiques
+dfit_pnl = dfit[dfit['Metrics'].str.contains('EcoPnL', case=False, na=False)]
+dfbk_pnl = dfbk[dfbk['ScopeOfData'].str.contains('EcoPnL', case=False, na=False)]
+dfrf_pnl = dfrf[dfrf['ScopeOfData'].str.contains('EcoPnL', case=False, na=False)]
 
-# Étape 3: Ajouter une colonne 'Type'
-dfit_filtered['Type'] = 'IT'
-dfbk_filtered['Type'] = 'BOOKING'
-dfrf_filtered['Type'] = 'REFERENTIAL'
+# Conversion des dates et renommage des colonnes
+dfit_pnl['ValueDate'] = pd.to_datetime(dfit_pnl['ValueDate'])
+dfbk_pnl['WMGSADate'] = pd.to_datetime(dfbk_pnl['WMGSADate'])
+dfrf_pnl['WMGSADate'] = pd.to_datetime(dfrf_pnl['WMGSADate'])
 
-# Étape 4: Concaténer les dataframes
-df_final = pd.concat([dfit_filtered, dfbk_filtered, dfrf_filtered], ignore_index=True)
+dfit_pnl = dfit_pnl.rename(columns={'ValueDate': 'Incident_date', 'GRPPC200': 'Perimeter'})
+dfbk_pnl = dfbk_pnl.rename(columns={'WMGSADate': 'Incident_date', 'grppc200': 'Perimeter'})
+dfrf_pnl = dfrf_pnl.rename(columns={'WMGSADate': 'Incident_date', 'grppc200': 'Perimeter'})
 
-# Maintenant, df_final devrait contenir vos données concaténées
+# Ajout de la colonne 'Type'
+dfit_pnl['Type'] = 'IT'
+dfbk_pnl['Type'] = 'BOOKING'
+dfrf_pnl['Type'] = 'REFERENTIAL'
+
+# Sélection des colonnes pertinentes pour la concaténation
+columns_to_select = ['Incident_date', 'Perimeter', 'Type']
+dfit_pnl = dfit_pnl[columns_to_select]
+dfbk_pnl = dfbk_pnl[columns_to_select]
+dfrf_pnl = dfrf_pnl[columns_to_select]
+
+# Concaténation des dataframes
+df_concatenated = pd.concat([dfit_pnl, dfbk_pnl, dfrf_pnl], ignore_index=True)
+
+# Résultat final
+print(df_concatenated)
