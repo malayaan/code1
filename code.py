@@ -1,17 +1,13 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 
-# Supposons que grouped contient déjà les groupements par périmètre et root cause
-# Nous devons d'abord compter les différentes root causes pour chaque périmètre
-unique_root_causes_per_group = grouped.groupby(['col1', 'col2', 'col3'])['rootcause'].nunique()
+# Chargement du DataFrame (exemple)
+# df = pd.read_csv('chemin/vers/votre/fichier.csv')
 
-# Maintenant, nous comptons combien de groupes ont eu 1, 2, 3, etc., différentes explications
-counts_of_explanation_types = unique_root_causes_per_group.value_counts().sort_index()
+# Regrouper par périmètre et par le nom de la personne qui a reporté l'incident
+grouped_reports = df.groupby(['col1', 'col2', 'col3', 'reporter']).size().reset_index(name='count')
 
-# Plot pour les fréquences des différents nombres d'explications par périmètre
-counts_of_explanation_types.plot(kind='bar')
-plt.title('Nombre d\'occurrences par nombre différent d\'explications')
-plt.xlabel('Nombre d\'explications différentes')
-plt.ylabel('Nombre d\'occurrences')
-plt.xticks(rotation=0)  # Assure que les labels des x-axis sont horizontaux
-plt.show()
+# Trier les résultats pour mieux visualiser les personnes qui ont signalé de nombreux incidents
+sorted_reports = grouped_reports.sort_values(by='count', ascending=False)
+
+# Afficher le résultat
+print(sorted_reports)
