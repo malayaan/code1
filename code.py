@@ -1,37 +1,17 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Chargement du DataFrame (exemple)
-# df = pd.read_csv('chemin/vers/votre/fichier.csv')
+# Supposons que grouped contient déjà les groupements par périmètre et root cause
+# Nous devons d'abord compter les différentes root causes pour chaque périmètre
+unique_root_causes_per_group = grouped.groupby(['col1', 'col2', 'col3'])['rootcause'].nunique()
 
-# Identifier les doublons
-duplicates = df.duplicated(subset=['col1', 'col2', 'col3'], keep=False)
+# Maintenant, nous comptons combien de groupes ont eu 1, 2, 3, etc., différentes explications
+counts_of_explanation_types = unique_root_causes_per_group.value_counts().sort_index()
 
-# Créer un DataFrame avec seulement les doublons
-df_duplicates = df[duplicates]
-
-# Grouper par les trois colonnes et la colonne 'rootcause' pour voir la variabilité des root causes
-grouped = df_duplicates.groupby(['col1', 'col2', 'col3', 'rootcause']).size().reset_index(name='counts')
-
-# Identifier où il y a des justifications différentes pour les mêmes incidents
-diff_justification = grouped.groupby(['col1', 'col2', 'col3']).filter(lambda x: x['rootcause'].nunique() > 1)
-
-# Compter les occurrences des différentes justifications pour les mêmes incidents
-diff_counts = diff_justification.groupby(['col1', 'col2', 'col3']).size()
-
-# Plot pour les doublons avec justifications différentes
-diff_counts.plot(kind='bar')
-plt.title('Doublons avec différentes justifications')
-plt.xlabel('Incidents')
-plt.ylabel('Nombre de différentes justifications')
-plt.show()
-
-# Compter la fréquence de chaque justification dans tout le DataFrame
-rootcause_counts = df['rootcause'].value_counts()
-
-# Plot pour les fréquences des justifications
-rootcause_counts.plot(kind='bar')
-plt.title('Fréquence de chaque justification')
-plt.xlabel('Justification')
-plt.ylabel('Fréquence')
+# Plot pour les fréquences des différents nombres d'explications par périmètre
+counts_of_explanation_types.plot(kind='bar')
+plt.title('Nombre d\'occurrences par nombre différent d\'explications')
+plt.xlabel('Nombre d\'explications différentes')
+plt.ylabel('Nombre d\'occurrences')
+plt.xticks(rotation=0)  # Assure que les labels des x-axis sont horizontaux
 plt.show()
