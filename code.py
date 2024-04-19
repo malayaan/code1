@@ -1,37 +1,37 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
-# Lecture des fichiers CSV
-dfit = pd.read_csv('dataframes/Unity_it_clean.csv')
-dfbk = pd.read_csv('dataframes/SGWorkflow_booking_clean.csv')
-dfrf = pd.read_csv('dataframes/SGWorkflow_referential_clean.csv')
+# Chargement du DataFrame (exemple)
+# df = pd.read_csv('chemin/vers/votre/fichier.csv')
 
-# Filtre basé sur les conditions spécifiques
-dfit_pnl = dfit[dfit['Metrics'].str.contains('EcoPnL', case=False, na=False)]
-dfbk_pnl = dfbk[dfbk['ScopeOfData'].str.contains('EcoPnL', case=False, na=False)]
-dfrf_pnl = dfrf[dfrf['ScopeOfData'].str.contains('EcoPnL', case=False, na=False)]
+# Identifier les doublons
+duplicates = df.duplicated(subset=['col1', 'col2', 'col3'], keep=False)
 
-# Conversion des dates et renommage des colonnes
-dfit_pnl['ValueDate'] = pd.to_datetime(dfit_pnl['ValueDate'])
-dfbk_pnl['WMGSADate'] = pd.to_datetime(dfbk_pnl['WMGSADate'])
-dfrf_pnl['WMGSADate'] = pd.to_datetime(dfrf_pnl['WMGSADate'])
+# Créer un DataFrame avec seulement les doublons
+df_duplicates = df[duplicates]
 
-dfit_pnl = dfit_pnl.rename(columns={'ValueDate': 'Incident_date', 'GRPPC200': 'Perimeter'})
-dfbk_pnl = dfbk_pnl.rename(columns={'WMGSADate': 'Incident_date', 'grppc200': 'Perimeter'})
-dfrf_pnl = dfrf_pnl.rename(columns={'WMGSADate': 'Incident_date', 'grppc200': 'Perimeter'})
+# Grouper par les trois colonnes et la colonne 'rootcause' pour voir la variabilité des root causes
+grouped = df_duplicates.groupby(['col1', 'col2', 'col3', 'rootcause']).size().reset_index(name='counts')
 
-# Ajout de la colonne 'Type'
-dfit_pnl['Type'] = 'IT'
-dfbk_pnl['Type'] = 'BOOKING'
-dfrf_pnl['Type'] = 'REFERENTIAL'
+# Identifier où il y a des justifications différentes pour les mêmes incidents
+diff_justification = grouped.groupby(['col1', 'col2', 'col3']).filter(lambda x: x['rootcause'].nunique() > 1)
 
-# Sélection des colonnes pertinentes pour la concaténation
-columns_to_select = ['Incident_date', 'Perimeter', 'Type']
-dfit_pnl = dfit_pnl[columns_to_select]
-dfbk_pnl = dfbk_pnl[columns_to_select]
-dfrf_pnl = dfrf_pnl[columns_to_select]
+# Compter les occurrences des différentes justifications pour les mêmes incidents
+diff_counts = diff_justification.groupby(['col1', 'col2', 'col3']).size()
 
-# Concaténation des dataframes
-df_concatenated = pd.concat([dfit_pnl, dfbk_pnl, dfrf_pnl], ignore_index=True)
+# Plot pour les doublons avec justifications différentes
+diff_counts.plot(kind='bar')
+plt.title('Doublons avec différentes justifications')
+plt.xlabel('Incidents')
+plt.ylabel('Nombre de différentes justifications')
+plt.show()
 
-# Résultat final
-print(df_concatenated)
+# Compter la fréquence de chaque justification dans tout le DataFrame
+rootcause_counts = df['rootcause'].value_counts()
+
+# Plot pour les fréquences des justifications
+rootcause_counts.plot(kind='bar')
+plt.title('Fréquence de chaque justification')
+plt.xlabel('Justification')
+plt.ylabel('Fréquence')
+plt.show()
