@@ -1,35 +1,26 @@
-import pandas as pd
+# Regrouper par date, périmètre, et RequestedForPerson.Name, puis compter les occurrences
+grouped_reports = df.groupby(['ValueDate', 'GRPPC200', 'GOP', 'RequestedForPerson.Name']).size().reset_index(name='count')
 
-# Charger votre dataframe
-# Assurez-vous que les colonnes de date sont au format datetime
+# Filtrer pour garder uniquement les cas où il y a eu plusieurs rapports sur le même périmètre et la même date, peu importe la personne
+multiple_reports = grouped_reports.groupby(['ValueDate', 'GRPPC200', 'GOP']).filter(lambda x: x['RequestedForPerson.Name'].nunique() > 1)
 
-# Grouper les données par date et périmètre
-grouped = df.groupby(['ValueDate', 'GRPPC200', 'GOP'])
+# Récupérer les indices des incidents correspondants dans le DataFrame original
+incident_indices = df.reset_index().merge(multiple_reports, on=['ValueDate', 'GRPPC200', 'GOP'])['index']
 
-# Initialiser les compteurs
-total_duplicates = 0
-duplicates_same_reporter = 0
-duplicates_different_reporters = 0
+# Afficher les lignes concernées, regroupées par périmètre et reporter
+detailed_incidents = df.loc[incident_indices].sort_values(by=['ValueDate', 'GRPPC200', 'GOP', 'RequestedForPerson.Name'])
 
-# Parcourir chaque groupe
-for _, group in grouped:
-    if len(group) > 1:  # Plus d'un incident dans le groupe signifie un duplicata
-        total_duplicates += len(group) - 1  # Ajouter le nombre de duplicatas
-        
-        # Pour chaque symptôme dans le groupe, déterminer s'il a été reporté plusieurs fois par la même personne ou par des personnes différentes
-        for symptom in group['Symptom'].unique():
-            symptom_group = group[group['Symptom'] == symptom]
-            if symptom_group['RequestedForPerson.Name'].nunique() == 1:
-                duplicates_same_reporter += len(symptom_group) - 1
-            else:
-                duplicates_different_reporters += len(symptom_group) - 1
-
-# Calculer les pourcentages
-total_incidents = len(df)
-percentage_duplicates = (total_duplicates / total_incidents) * 100
-percentage_duplicates_same_reporter = (duplicates_same_reporter / total_duplicates) * 100 if total_duplicates else 0
-percentage_duplicates_different_reporters = (duplicates_different_reporters / total_duplicates) * 100 if total_duplicates else 0
-
-print(f"Pourcentage d'incidents reportés en double : {percentage_duplicates:.2f}%")
-print(f"Pourcentage de ces duplicates reportés par la même personne : {percentage_duplicates_same_reporter:.2f}%")
-print(f"Pourcentage de ces duplicates reportés par des personnes différentes : {percentage_duplicates_different_reporters:.2f}%")
+# Imprimer chaque groupe séparément pour une meilleure lisibilité
+for _, group in detailed_incidents.groupby(['ValueDate', 'GRPPC200', 'GOP']):
+    # Assurer que le groupe contient des rapports de plusieurs personnes
+    if group['RequestedForPerson.Name'].nunique() > 1:
+        # Obtenir le périmètre et la date
+        date = group['ValueDate'].iloc[0]
+        perimetre = group['GRPPC200'].iloc[0] + ' ' + group['GOP'].iloc[0]
+        # Afficher les détails
+        print(f"\nIncidents rapportés sur le périmètre {perimetre} le {date}:")
+        # Itérer sur chaque ligne pour afficher les informations
+        for index, row in group.iterrows():
+            analyste = row['RequestedForPerson.Name']
+            symptom = row['Symptom']
+            print(f"Rapporté par {analyste} pour le symptôme {symptom}")
