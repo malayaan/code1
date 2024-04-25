@@ -1,26 +1,28 @@
-# Regrouper par date, périmètre, et RequestedForPerson.Name, puis compter les occurrences
-grouped_reports = df.groupby(['ValueDate', 'GRPPC200', 'GOP', 'RequestedForPerson.Name']).size().reset_index(name='count')
+import pandas as pd
+import matplotlib.pyplot as plt
 
-# Filtrer pour garder uniquement les cas où il y a eu plusieurs rapports sur le même périmètre et la même date, peu importe la personne
-multiple_reports = grouped_reports.groupby(['ValueDate', 'GRPPC200', 'GOP']).filter(lambda x: x['RequestedForPerson.Name'].nunique() > 1)
+# Supposons que 'data_column' est la colonne sur laquelle vous effectuez value_counts()
+value_counts = df['data_column'].value_counts()
 
-# Récupérer les indices des incidents correspondants dans le DataFrame original
-incident_indices = df.reset_index().merge(multiple_reports, on=['ValueDate', 'GRPPC200', 'GOP'])['index']
+# Regrouper les petits comptes en une seule catégorie 'Small Desk'
+small_counts_mask = value_counts < 1000
+small_counts = value_counts[small_counts_mask]
+value_counts = value_counts[~small_counts_mask]
 
-# Afficher les lignes concernées, regroupées par périmètre et reporter
-detailed_incidents = df.loc[incident_indices].sort_values(by=['ValueDate', 'GRPPC200', 'GOP', 'RequestedForPerson.Name'])
+# Si 'Small Desk' existe déjà, ajoutez-y les petits comptes, sinon créez-la
+if 'Small Desk' in value_counts.index:
+    value_counts['Small Desk'] += small_counts.sum()
+else:
+    value_counts['Small Desk'] = small_counts.sum()
 
-# Imprimer chaque groupe séparément pour une meilleure lisibilité
-for _, group in detailed_incidents.groupby(['ValueDate', 'GRPPC200', 'GOP']):
-    # Assurer que le groupe contient des rapports de plusieurs personnes
-    if group['RequestedForPerson.Name'].nunique() > 1:
-        # Obtenir le périmètre et la date
-        date = group['ValueDate'].iloc[0]
-        perimetre = group['GRPPC200'].iloc[0] + ' ' + group['GOP'].iloc[0]
-        # Afficher les détails
-        print(f"\nIncidents rapportés sur le périmètre {perimetre} le {date}:")
-        # Itérer sur chaque ligne pour afficher les informations
-        for index, row in group.iterrows():
-            analyste = row['RequestedForPerson.Name']
-            symptom = row['Symptom']
-            print(f"Rapporté par {analyste} pour le symptôme {symptom}")
+# Maintenant, value_counts a tous les grands comptes et une catégorie 'Small Desk' pour les petits
+
+# Créer un pie chart
+plt.pie(value_counts, labels=value_counts.index, autopct='%1.1f%%', startangle=140)
+plt.axis('equal')  # Assurer que le pie chart est un cercle
+
+# Ajouter un titre
+plt.title('Répartition des valeurs avec regroupement des petits comptes')
+
+# Afficher le diagramme
+plt.show()
