@@ -1,22 +1,27 @@
-import pandas as pd
-import matplotlib.pyplot as plt
+# Supprimer les lignes où les colonnes de date ou de Product Type sont NaN
+df_clean = df.dropna(subset=['Deal - Effective Maturity', 'pricingdate', 'Product Type'])
 
-# Création d'un DataFrame exemple avec des dates de maturité et de pricing
-data = {
-    'Product_Type': ['A', 'B', 'A', 'C', 'B', 'D', 'C', 'A'],
-    'col1': pd.to_datetime(['2022-01-10', '2022-01-11', '2022-01-12', '2022-01-13',
-                            '2022-01-14', '2022-01-15', '2022-01-16', '2022-01-17']),
-    'col3': pd.to_datetime(['2022-01-09', '2022-01-10', '2022-01-11', '2022-01-12',
-                            '2022-01-13', '2022-01-14', '2022-01-15', '2022-01-08'])
-}
-df = pd.DataFrame(data)
+# À ce stade, df_clean contiendra seulement les lignes où les dates et les product types sont présents
+# Convertir les dates en les vérifiant
+def safe_convert_date(date_series, errors='coerce'):
+    return pd.to_datetime(date_series, errors=errors)
 
-# Calculer la durée de vie du deal
-df['Deal_Life'] = (df['col1'] - df['col3']).dt.days
+# Appliquer la fonction de conversion en toute sécurité
+df_clean['Deal - Effective Maturity'] = safe_convert_date(df_clean['Deal - Effective Maturity'])
+df_clean['pricingdate'] = safe_convert_date(df_clean['pricingdate'])
 
-# Tracer la répartition des durées de vie des deals
-df['Deal_Life'].value_counts().sort_index().plot(kind='bar')
-plt.title('Répartition des Durées de Vie des Deals')
-plt.xlabel('Durée de Vie en Jours')
-plt.ylabel('Nombre de Deals')
-plt.show()
+# Supprimer les lignes avec des erreurs de conversion après la coercion
+df_clean = df_clean.dropna(subset=['Deal - Effective Maturity', 'pricingdate'])
+# Définir des limites de date raisonnables (par exemple, de 1900 à 2100)
+start_date = pd.Timestamp('1900-01-01')
+end_date = pd.Timestamp('2100-01-01')
+
+# Filtrer les lignes où les dates sont à l'intérieur de la plage spécifiée
+df_clean = df_clean[
+    (df_clean['Deal - Effective Maturity'] >= start_date) & 
+    (df_clean['Deal - Effective Maturity'] <= end_date) &
+    (df_clean['pricingdate'] >= start_date) & 
+    (df_clean['pricingdate'] <= end_date)
+]
+# Vérifier le nombre de lignes restantes
+print(f"Nombre de lignes après nettoyage : {df_clean.shape[0]}")
