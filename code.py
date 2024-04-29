@@ -1,35 +1,5 @@
-import plotly.express as px
 
-# Supposons que 'embeddings_3d' est votre array résultant de PCA
-# et 'unique_product_types' contient vos étiquettes correspondantes.
+Introduction
+At Société Générale, the integrity of data quality (DQ) management is crucial, especially during the metrics certification process. Analysts report incidents related to IT failures, booking errors, or inaccuracies in referential data. A considerable challenge in managing these incidents is the presence of what appear to be duplicate reports. Preliminary observations suggest that 13% of incidents are flagged on the same date and within the same perimeter as a previously reported incident. While these could represent genuine new issues, there is a risk they are misclassified duplicates.
 
-# Nous créons un DataFrame pour faciliter la manipulation avec Plotly
-df_embeddings = pd.DataFrame(embeddings_3d, columns=['PC1', 'PC2', 'PC3'])
-df_embeddings['product_type'] = unique_product_types  # Ajout des étiquettes
-
-# Création du graphique avec une palette de couleurs diversifiée
-fig = px.scatter_3d(
-    df_embeddings,
-    x='PC1', y='PC2', z='PC3',
-    color='product_type',  # Attribuer une couleur unique à chaque type de produit
-    color_discrete_sequence=px.colors.qualitative.Bold  # Utilisation d'une palette de couleurs plus vives
-)
-
-# Personnalisation des marqueurs
-fig.update_traces(marker=dict(size=3))  # Réduction de la taille des points
-
-# Mise à l'échelle des axes pour qu'ils aient la même taille et ajout de noms aux axes
-fig.update_layout(
-    scene=dict(
-        xaxis=dict(title='PC1', nticks=10, range=[-1,1]),
-        yaxis=dict(title='PC2', nticks=10, range=[-1,1]),
-        zaxis=dict(title='PC3', nticks=10, range=[-1,1]),
-        aspectmode='cube'  # Cela forcera tous les axes à la même échelle
-    ),
-    legend_title=dict(text='Type de Produit'),
-    showlegend=True,
-    title='Visualisation 3D des Types de Produits par PCA'
-)
-
-# Afficher le graphique
-fig.show()
+This statistical analysis, conducted during an internship leveraging data science tools to improve problem classification, will explore these potential duplicates. Our goal is to refine the incident reporting process by accurately identifying true duplicates, thereby allowing analysts to dedicate more resources to actual DQ problems. This initiative will not only help streamline incident management but also enhance the overall accuracy and efficiency of DQ issue resolution at Société Générale.
