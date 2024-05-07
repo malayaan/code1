@@ -17,7 +17,11 @@ unique_gops = pd.unique(df['gop'])
 co_occurrence_matrix = pd.DataFrame(0, index=unique_gops, columns=unique_gops)
 
 # Fill the matrix
-for gops in date_groups:
+total_dates = len(date_groups)
+current_date = 0
+for date, gops in date_groups.items():
+    current_date += 1
+    print(f"Processing date {current_date}/{total_dates} - {date}")
     for i in gops:
         for j in gops:
             if i != j:
