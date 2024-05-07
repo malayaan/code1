@@ -1,37 +1,23 @@
+from sklearn.feature_extraction.text import CountVectorizer
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 
-# Simuler des données
-data = {
-    'date': ['2021-01-01', '2021-01-01', '2021-01-02', '2021-01-02', '2021-01-03'],
-    'gop': ['A', 'B', 'A', 'B', 'C']
-}
-df = pd.DataFrame(data)
+# Exemple de données textuelles
+texts = [
+    "chatbot technology advances rapidly",
+    "natural language processing and chatbot enhancements",
+    "new advances in artificial intelligence",
+    "developing a smarter chatbot using NLP",
+    "AI and machine learning revolutionize automation"
+]
 
-# Group by date and list all gop entries per date
-date_groups = df.groupby('date')['gop'].apply(list)
+# Création du CountVectorizer
+vectorizer = CountVectorizer()
 
-# Build a correlation matrix
-unique_gops = pd.unique(df['gop'])
-correlation_matrix = pd.DataFrame(0, index=unique_gops, columns=unique_gops)
+# Appliquer le vectorizer aux données textuelles pour obtenir la matrice BoW
+bow_matrix = vectorizer.fit_transform(texts)
 
-# Fill the matrix
-for gops in date_groups:
-    for i in gops:
-        for j in gops:
-            if i != j:
-                correlation_matrix.at[i, j] += 1
+# Convertir la matrice BoW en DataFrame pandas
+bow_df = pd.DataFrame(bow_matrix.toarray(), columns=vectorizer.get_feature_names_out())
 
-# Calculate correlation
-total_entries = df.shape[0]
-for i in unique_gops:
-    for j in unique_gops:
-        if i != j:
-            correlation_matrix.at[i, j] /= total_entries
-
-# Visualisation
-plt.figure(figsize=(10, 7))
-sns.heatmap(correlation_matrix, annot=True, cmap="YlGnBu")
-plt.title('Matrice de corrélation des valeurs GOP par date')
-plt.show()
+# Afficher le DataFrame
+print(bow_df)
