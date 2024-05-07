@@ -1,6 +1,7 @@
 import json
 import re
 from sklearn.feature_extraction.text import CountVectorizer
+import matplotlib.pyplot as plt
 
 # Fonction pour supprimer les commentaires de Python et HQL
 def remove_comments(code, language):
@@ -14,8 +15,8 @@ def remove_comments(code, language):
 
 # Liste simulée de données
 data = [
-    ['{"Datedutruc": "2023-04-03", "metric":"var"}', ..., 'print("Hello, world!") # This is a comment'],
-    ['{"Datedutruc": "2023-05-22", "metric":"var2"}', ..., 'SELECT * FROM table; -- Select statement']
+    ['{"Datedutruc": "2023-04-03", "metric":"var"}', '...', 'print("Hello, world!") # This is a comment'],
+    ['{"Datedutruc": "2023-05-22", "metric":"var2"}', '...', 'SELECT * FROM table; -- Select statement']
 ]
 
 # Prétraitement des données pour enlever les commentaires
@@ -35,7 +36,16 @@ for entry in data:
 vectorizer = CountVectorizer()
 bow_matrix = vectorizer.fit_transform(cleaned_data)
 
-# Affichage des résultats
-print("Vocabulaire:", vectorizer.get_feature_names_out())
-print("Bag of Words matrix:\n", bow_matrix.toarray())
+# Extraction des fréquences des mots et vocabulaire
+word_freq = bow_matrix.sum(axis=0)
+words = vectorizer.get_feature_names_out()
+freq_dict = dict(zip(words, word_freq.tolist()[0]))
 
+# Création du graphique
+plt.figure(figsize=(10, 8))
+plt.bar(freq_dict.keys(), freq_dict.values(), color='blue')
+plt.xlabel('Mots')
+plt.ylabel('Fréquence')
+plt.title('Fréquence des mots dans les documents')
+plt.xticks(rotation=90)  # Rotation des étiquettes pour meilleure lisibilité
+plt.show()
