@@ -1,51 +1,18 @@
-import json
-import re
-from sklearn.feature_extraction.text import CountVectorizer
+import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
 
-# Fonction pour supprimer les commentaires de Python et HQL
-def remove_comments(code, language):
-    if language == 'python':
-        return re.sub(r"#.*", "", code)
-    elif language == 'hql':
-        code = re.sub(r"--.*", "", code)
-        return re.sub(r"/\*.*?\*/", "", code, flags=re.DOTALL)
-    else:
-        return code
+# Charger les données
+data = pd.read_csv('chemin_vers_votre_fichier.csv')
 
-# Liste simulée de données
-data = [
-    ['{"Datedutruc": "2023-04-03", "metric":"var"}', '...', 'print("Hello, world!") # This is a comment'],
-    ['{"Datedutruc": "2023-05-22", "metric":"var2"}', '...', 'SELECT * FROM table; -- Select statement']
-]
+# Créer une table de présence des GOP par date
+presence = pd.crosstab(data['date'], data['gop'])
 
-# Prétraitement des données pour enlever les commentaires
-cleaned_data = []
-for entry in data:
-    json_data = json.loads(entry[0])  # Assume JSON data in the first element
-    code = entry[5]  # Code in the 6th element
-    
-    # Déterminer le langage basé sur un champ métrique ou autre indicateur
-    language = 'python' if 'py' in json_data['metric'] else 'hql'
-    
-    # Nettoyer les commentaires
-    cleaned_code = remove_comments(code, language)
-    cleaned_data.append(cleaned_code)
+# Calculer la matrice de confusion
+confusion_matrix = presence.T.dot(presence)
 
-# Création du modèle Bag of Words
-vectorizer = CountVectorizer()
-bow_matrix = vectorizer.fit_transform(cleaned_data)
-
-# Extraction des fréquences des mots et vocabulaire
-word_freq = bow_matrix.sum(axis=0)
-words = vectorizer.get_feature_names_out()
-freq_dict = dict(zip(words, word_freq.tolist()[0]))
-
-# Création du graphique
+# Visualiser la matrice de confusion
 plt.figure(figsize=(10, 8))
-plt.bar(freq_dict.keys(), freq_dict.values(), color='blue')
-plt.xlabel('Mots')
-plt.ylabel('Fréquence')
-plt.title('Fréquence des mots dans les documents')
-plt.xticks(rotation=90)  # Rotation des étiquettes pour meilleure lisibilité
+sns.heatmap(confusion_matrix, annot=True, cmap='coolwarm')
+plt.title('Matrice de confusion des problèmes GOP')
 plt.show()
