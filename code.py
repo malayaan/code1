@@ -1,35 +1,40 @@
-import pandas as pd
+import matplotlib.pyplot as plt
 
-# Supposons que df_incidents et df_deals sont vos deux DataFrames
+# Sort the pricingdate values in chronological order
+sorted_dates = sorted(df_concatenated[df_concatenated['Gop'] == gop_value]['pricingdate'].unique())
 
-# DataFrame des incidents
-# df_incidents = pd.DataFrame({
-#     'IncidentDate': [...],
-#     'Gop': [...],
-#     'Type': [...]
-# })
-
-# DataFrame des deals
-# df_deals = pd.DataFrame({
-#     'PricingDate': [...],
-#     'Gop': [...]
-# })
-
-# Étape 1: Renommer les colonnes pour clarifier la jointure
-df_incidents = df_incidents.rename(columns={'IncidentDate': 'Date', 'Type': 'IncidentType'})
-df_deals = df_deals.rename(columns={'PricingDate': 'Date'})
-
-# Étape 2: Effectuer une jointure sur 'Gop' et 'Date'
-df_merged = pd.merge(df_deals, df_incidents, on=['Gop', 'Date'], how='left')
-
-# Étape 3: Remplir la colonne 'Type' avec 'NotAnIncident' lorsque 'IncidentType' est NaN, sinon avec 'IncidentType'
-df_merged['Type'] = df_merged['IncidentType'].fillna('NotAnIncident')
-
-# Étape 4: Supprimer la colonne intermédiaire 'IncidentType' si nécessaire
-df_merged = df_merged.drop(columns=['IncidentType'])
-
-# Étape 5: Renommer la colonne 'Date' à 'PricingDate' pour revenir à l'original
-df_merged = df_merged.rename(columns={'Date': 'PricingDate'})
-
-# df_merged est le DataFrame final avec la colonne 'Type' ajoutée
-print(df_merged)
+# Iterate over the sorted dates
+for date_value in sorted_dates:
+    # Filter the DataFrame based on the current combination
+    df_concatenated_combination = df_concatenated[(df_concatenated['Gop'] == gop_value) & (df_concatenated['pricingdate'] == date_value)]
+    
+    # Get the top 10 rows with the largest absolute Daily_Pnl_Variation_Percentage
+    top_10 = df_concatenated_combination.nlargest(10, 'abs_daily_pnl_variation_percentage')
+    
+    # Get the corresponding Daily_Pnl_Variation_Gop value from df_gop_day
+    daily_pnl_variation_gop = df_gop_day[(df_gop_day['Gop'] == gop_value) & (df_gop_day['pricingdate'] == date_value)]['Daily_Pnl_Variation_Gop'].values[0]
+    
+    # Plot the graph with the updated title
+    plt.figure(figsize=(10, 6))
+    plt.bar(top_10['Deal Id'], top_10['Daily_Pnl_Variation_Percentage'], color='blue')
+    
+    # Formatting the x-axis to remove the time part
+    plt.gca().xaxis.set_major_formatter(plt.FixedFormatter(top_10['Deal Id'].values))
+    
+    # Formatting the y-axis to limit the number of digits after the decimal
+    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:.2f}'))
+    
+    # Adding horizontal line at y=0
+    plt.axhline(0, color='black', linewidth=0.8)
+    
+    # Adding labels and title with better formatting
+    plt.xlabel('Deal Id')
+    plt.ylabel('Daily Pnl Variation Percentage')
+    plt.title(f'{gop_value} - {date_value.strftime("%Y-%m-%d")} (Daily Pnl Variation Gop: {daily_pnl_variation_gop:.2f})')
+    
+    # Rotating x-axis labels for better readability
+    plt.xticks(rotation=45, ha='right')
+    
+    # Show the plot
+    plt.tight_layout()
+    plt.show()
