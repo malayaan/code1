@@ -1,77 +1,107 @@
-# Updating the incidents data
-incidents_data = {
-    'incident_id': [101],
-    'group_or_portfolio': ['A'],
-    'comment': [
-        'Issue with deal listfzhifdjnghnzri@@cnc@TD_XKDI'
-    ]
-}
-incidents_df = pd.DataFrame(incidents_data)
+### Slide 1: Title Slide
+**Title:**  
+Implementing a Classifier for Data Quality Incidents in Trading Desks
 
-# Preprocessing the comments
-def preprocess_comment(comment):
-    # Tokenization: split by spaces
-    tokens = comment.split()
-    # Remove punctuation and short tokens unless they contain uppercase letters, digits, or special characters
-    tokens = [word for word in tokens if (
-        word.isalnum() and len(word) > 1 and not word[0].isupper()
-        or any(char.isupper() for char in word)
-        or any(char.isdigit() for char in word)
-        or any(not char.isalnum() for char in word)
-    )]
-    # Remove common stopwords except specified ones
-    custom_stopwords = {'a', 'an', 'the', 'is', 'in', 'on', 'with', 'and', 'for', 'of', 'to', 'has', 'have', 'had'} - {'all', 'entire'}
-    tokens = [word for word in tokens if word.lower() not in custom_stopwords]
-    return tokens
+**Subtitle:**  
+Focusing on a Specific Trading Desk for Effective Classification
 
-incidents_df['processed_comment'] = incidents_df['comment'].apply(preprocess_comment)
+**Prepared by:**  
+[Your Name]
 
-# Display the tokenized message
-tokenized_message = incidents_df['processed_comment'].iloc[0]
+---
 
-# Extracting information from the comments
-def extract_info_from_comment(tokens, deals_df):
-    deal_ids = set()
-    portfolio_ids = set()
-    features = {}
-    
-    for token in tokens:
-        # Check if the token is a deal, portfolio, or group ID
-        if token in deals_df['deal_id'].values:
-            deal_ids.add(token)
-        elif token in deals_df['portfolio_id'].values:
-            portfolio_ids.add(token)
-        elif token.isupper() and len(token) > 3:
-            if token in deals_df['portfolio_id'].values:
-                portfolio_ids.add(token)
-        elif '=' in token:
-            feature, value = token.split('=')
-            if feature in deals_df.columns:
-                features[feature] = value
-    
-    # Identify impacted deals
-    affected_deals = set()
-    
-    if deal_ids:
-        affected_deals.update(deals_df[deals_df['deal_id'].isin(deal_ids)].index)
-    if portfolio_ids:
-        affected_deals.update(deals_df[deals_df['portfolio_id'].isin(portfolio_ids)].index)
-    for feature, value in features.items():
-        if value.isdigit():
-            value = int(value)
-        affected_deals.update(deals_df[deals_df[feature] == value].index)
-    
-    return list(affected_deals)
+### Slide 2: Introduction
+**Objective:**  
+To classify deals to identify whether they present a Data Quality (DQ) incident or not.
 
-def flag_deals(deals_df, incidents_df):
-    deals_df['flag'] = 0
-    
-    for _, incident in incidents_df.iterrows():
-        affected_deals = extract_info_from_comment(incident['processed_comment'], deals_df)
-        deals_df.loc[affected_deals, 'flag'] = 1
-    
-    return deals_df
+**Context:**  
+We have limited our data environment to a specific trading desk to develop an effective classifier.
 
-flagged_deals_df = flag_deals(deals_df, incidents_df)
+---
 
-tokenized_message, flagged_deals_df
+### Slide 3: Why Focus on a Specific Trading Desk?
+**Unique Characteristics:**  
+- Each trading desk operates differently with unique methods and evaluation criteria.
+- Focusing on one desk allows for creating a model tailored to its specific reasoning.
+
+**Data Management:**  
+- Limiting data scope helps in better managing and tuning the dataset.
+- Our systems cannot handle very large datasets, making this approach practical.
+
+---
+
+### Slide 4: Importance of Data Quality
+**Garbage In, Garbage Out:**  
+- High-quality input data is crucial for a successful model.
+- If the model does not have all the relevant information used by analysts, it cannot replicate their decision-making process effectively.
+
+**Feature Engineering:**  
+- More time can be spent on developing and understanding the features that influence the analysis.
+
+---
+
+### Slide 5: What is a Classifier?
+**Definition:**  
+A classifier is an AI tool that learns from existing data to predict categories or labels for new data.
+
+**Example in Our Context:**  
+- Our classifier will learn from labeled deals to predict if new deals have DQ incidents.
+
+---
+
+### Slide 6: Need for Labeled Data
+**Labeled Data:**  
+- The classifier needs labeled data to learn the patterns distinguishing problematic deals from non-problematic ones.
+
+**Training Process:**  
+- The model analyzes these patterns and applies what it has learned to new, unlabeled data to make predictions.
+
+---
+
+### Slide 7: How the Classifier Works
+**Learning Patterns:**  
+- Analyzes labeled data to identify distinguishing characteristics.
+
+**Making Predictions:**  
+- Applies learned patterns to new data to predict if a deal has a DQ incident.
+
+**Outcome:**  
+- An effective classifier that mimics the reasoning of human analysts in a specific trading desk.
+
+---
+
+### Slide 8: Benefits of This Approach
+**Precision:**  
+- Tailored model specific to the trading desk ensures high accuracy.
+
+**Efficiency:**  
+- Efficient data handling and feature engineering.
+
+**Scalability:**  
+- The approach can be adapted and scaled to other trading desks with specific customizations.
+
+---
+
+### Slide 9: Conclusion
+**Summary:**  
+- Restricting data to a specific trading desk enhances model effectiveness.
+- The classifier relies on high-quality, labeled data to learn and make accurate predictions.
+- This method ensures that the classifier can replicate the specific reasoning of analysts within that desk.
+
+**Next Steps:**  
+- Continue refining the model with new data.
+- Expand the approach to other trading desks with necessary customizations.
+
+---
+
+### Slide 10: Q&A
+**Questions?**  
+Feel free to ask any questions or clarifications about the project and our approach.
+
+**Contact Information:**  
+[Your Email Address]  
+[Your Phone Number]
+
+---
+
+You can use PowerPoint or Google Slides to create the slides with the above content. Each slide should focus on one key point to ensure clarity and effective communication with your manager.
