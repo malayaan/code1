@@ -1,37 +1,23 @@
-import pandas as pd
+# Function to create bar plots for each string column
+def plot_value_counts(df):
+    string_columns = df.select_dtypes(include=['object']).columns
+    num_columns = len(string_columns)
+    
+    fig, axes = plt.subplots(num_columns, 1, figsize=(10, 5 * num_columns))
 
-def read_custom_csv(file_path, delimiter):
-    rows = []
+    if num_columns == 1:
+        axes = [axes]
+        
+    for ax, column in zip(axes, string_columns):
+        value_counts = df[column].value_counts()
+        value_counts.plot(kind='bar', ax=ax, color='skyblue')
+        ax.set_title(f"Value Counts for '{column}'")
+        ax.set_xlabel('Values')
+        ax.set_ylabel('Counts')
+        ax.grid(axis='y')
 
-    with open(file_path, mode='r', encoding='utf-8') as file:
-        lines = file.readlines()
-        header = lines[0].split(',')[0:3]  # Lire l'en-tête et prendre les trois premières colonnes
-        for line in lines[1:]:
-            # Séparer manuellement les colonnes
-            parts = line.split(delimiter)[0].split(',')
-            if len(parts) >= 3:
-                col1 = parts[0]
-                col2 = parts[1]
-                col3 = ','.join(parts[2:])
-                rows.append([col1, col2, col3])
+    plt.tight_layout()
+    plt.show()
 
-    # Créer un DataFrame
-    df = pd.DataFrame(rows, columns=['col1', 'col2', 'col3'])
-    return df
-
-# Exemple d'utilisation
-file_content = """col1,col2,col3;;;;;
-1,2,etyduc,dfvi;;;;;
-5,4,ghjkoiug giuy;;;;;"""
-
-# Sauvegarder le contenu dans un fichier temporaire
-file_path = '/mnt/data/temp_file.csv'
-with open(file_path, 'w', encoding='utf-8') as file:
-    file.write(file_content)
-
-# Lire et afficher le DataFrame
-delimiter = ';;;;;'
-df = read_custom_csv(file_path, delimiter)
-import ace_tools as tools; tools.display_dataframe_to_user(name="Custom CSV DataFrame", dataframe=df)
-
-df
+# Call the function to plot the graphs
+plot_value_counts(df)
