@@ -1,12 +1,17 @@
-import seaborn as sns
+import pandas as pd
 import matplotlib.pyplot as plt
 
-# Supposons que `df` est votre DataFrame
-# Créer un countplot
-plt.figure(figsize=(12, 8))  # Ajuster la taille du graphique selon le besoin
-sns.countplot(data=df, x='ProductType', hue='UnderlyingType')
-plt.title('Distribution of Underlying Types within Each Product Type')
-plt.xticks(rotation=45)  # Rotation des labels sur l'axe x pour une meilleure lisibilité
-plt.legend(title='Underlying Type', bbox_to_anchor=(1.05, 1), loc='upper left')  # Déplacer la légende hors du graphique
-plt.tight_layout()  # Ajuster automatiquement les sous-graphiques pour qu'ils s'insèrent dans la figure
+# Supposons que df est votre DataFrame et contient les colonnes 'ProductType' et 'UnderlyingType'
+# Compter les occurrences de chaque UnderlyingType pour chaque ProductType
+data_pivot = df.groupby(['ProductType', 'UnderlyingType']).size().unstack(fill_value=0)
+
+# Créer un stacked bar chart
+data_pivot.plot(kind='bar', stacked=True, figsize=(10, 6))
+
+plt.title('Composition of Underlying Types within Each Product Type')
+plt.xlabel('Product Type')
+plt.ylabel('Count of Underlying Type')
+plt.xticks(rotation=45)  # Rotation des labels pour une meilleure lisibilité
+plt.legend(title='Underlying Type')
+plt.tight_layout()  # Ajuster la disposition
 plt.show()
