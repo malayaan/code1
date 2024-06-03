@@ -1,46 +1,12 @@
-import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-# Sample data based on the image and previous context
-data = {
-    'ProductType': [
-        'Share', 'IndexForward', 'SouitLeg', 'SecondaryShare', 'RateLeg', 
-        'FictitiousShare', 'CertificateLeg', 'OptionLeg', 'ADR', 'ClosedEndFund', 
-        'DividendLeg', 'PlainVanillaCall', 'PlainVanillaPut', 'Tracker', 
-        'IndexFuture', 'OpenEndFund', 'BasketForward', 'StockFuture', 'StockForward'
-    ]
-}
-
-# Creating a DataFrame
-df = pd.DataFrame(data)
-
-# Define a mapping for ProductType to ProductTypeGroup
-product_type_group_mapping = {
-    'Share': 'Equities',
-    'SecondaryShare': 'Equities',
-    'FictitiousShare': 'Equities',
-    'ADR': 'Equities',
-    'OptionLeg': 'Derivatives',
-    'PlainVanillaCall': 'Derivatives',
-    'PlainVanillaPut': 'Derivatives',
-    'IndexForward': 'Derivatives',
-    'StockForward': 'Derivatives',
-    'BasketForward': 'Derivatives',
-    'IndexFuture': 'Derivatives',
-    'StockFuture': 'Derivatives',
-    'RateLeg': 'Fixed Income',
-    'CertificateLeg': 'Fixed Income',
-    'DividendLeg': 'Fixed Income',
-    'ClosedEndFund': 'Funds',
-    'OpenEndFund': 'Funds',
-    'SouitLeg': 'Other',
-    'Tracker': 'Other'
-}
-
-# Replace ProductType with ProductTypeGroup
-df['ProductTypeGroup'] = df['ProductType'].map(product_type_group_mapping)
-
-# Drop the original ProductType column
-df = df.drop(columns=['ProductType'])
-
-# Display the updated DataFrame
-print(df)
+# Supposons que `df` est votre DataFrame
+# Créer un countplot
+plt.figure(figsize=(12, 8))  # Ajuster la taille du graphique selon le besoin
+sns.countplot(data=df, x='ProductType', hue='UnderlyingType')
+plt.title('Distribution of Underlying Types within Each Product Type')
+plt.xticks(rotation=45)  # Rotation des labels sur l'axe x pour une meilleure lisibilité
+plt.legend(title='Underlying Type', bbox_to_anchor=(1.05, 1), loc='upper left')  # Déplacer la légende hors du graphique
+plt.tight_layout()  # Ajuster automatiquement les sous-graphiques pour qu'ils s'insèrent dans la figure
+plt.show()
