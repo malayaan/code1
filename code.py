@@ -1,21 +1,23 @@
-# Afficher les premières lignes pour avoir un aperçu des données
-print(df.head())
+# Vérifier les valeurs manquantes
+missing_values = df.isnull().sum()
+print("Missing values per column:")
+print(missing_day)
+# Pourcentage des valeurs manquantes
+print("Percentage of missing values per column:")
+print(missing_values / len(df) * 100)
 
-# Résumé statistique des données numériques
-print(df.describe())
+# Supprimer ou imputer les valeurs manquantes
+# Exemple: Imputer les valeurs manquantes par la médiane
+for column in df.columns:
+    if df[column].isnull().any():
+        median_value = df[column].median()
+        df[column].fillna(median_value, inplace=True)
 
-# Visualisation de la distribution de chaque variable numérique
-fig, axs = plt.subplots(nrows=len(df.columns), figsize=(8, 4 * len(df.columns)))
-for i, col in enumerate(df.select_dtypes(include=[np.number]).columns):
-    sns.histplot(df[col], kde=True, ax=axs[i])
-    axs[i].set_title(f'Distribution of {col}')
-plt.tight_layout()
-plt.show()
-
-# Box plots pour visualiser les potentiels valeurs aberrantes
-fig, axs = plt.subplots(nrows=len(df.columns), figsize=(8, 4 * len(df.columns)))
-for i, col in enumerate(df.select_dtypes(include=[np.number]).columns):
-    sns.boxplot(x=df[col], ax=axs[i])
-    axs[i].set_title(f'Box plot of {col}')
-plt.tight_layout()
-plt.show()
+# Détecter les outliers et les traiter
+# Par exemple, en utilisant le score Z pour identifier les outliers
+from scipy import stats
+z_scores = np.abs(stats.zscore(df.select_dtypes(include=[np.number])))
+outliers = (z_scores > 3).any(axis=1)
+print("Number of identified outliers:", np.sum(outliers))
+# Optionnel: Supprimer les outliers
+df_clean = df[~outliers]
