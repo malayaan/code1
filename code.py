@@ -26,15 +26,16 @@ print(missing_values_y)
 
 # List of models to fit
 models = {
-    "Isolation Forest": IsolationForest(n_estimators=100, contamination='auto', random_state=42),
+    "Isolation Forest": IsolationForest(n_estimators=100, contamination='auto', random_state=42, warm_start=True),
     "One-Class SVM": OneClassSVM(kernel='rbf', gamma='auto', nu=0.05),
     "Elliptic Envelope": EllipticEnvelope(support_fraction=1., contamination='auto')
 }
 
-# Fit Isolation Forest separately to use its predict method later
-print("Fitting Isolation Forest...")
+# Fit Isolation Forest with progress bar
 iso_forest = models["Isolation Forest"]
-iso_forest.fit(X)
+for i in tqdm(range(1, iso_forest.n_estimators + 1), desc="Training Isolation Forest"):
+    iso_forest.set_params(n_estimators=i)
+    iso_forest.fit(X)
 
 # Local Outlier Factor needs special handling because it doesn't have a separate fit method
 print("Fitting Local Outlier Factor...")
@@ -44,7 +45,9 @@ lof_preds = lof.fit_predict(X)
 # Fit other models and display progress
 for model_name, model in tqdm(models.items(), desc="Fitting models"):
     if model_name != "Isolation Forest":  # We've already fit Isolation Forest
+        tqdm.write(f"Fitting {model_name}...")
         model.fit(X)
+        tqdm.write(f"{model_name} fitting complete.")
 
 # Make predictions
 print("Making predictions...")
