@@ -1,51 +1,36 @@
 import pandas as pd
-import numpy as np
-from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
+import seaborn as sns
 
-# Assuming df is your DataFrame with daily data for each deal
-df['PricingDate'] = pd.to_datetime(df['PricingDate'])
-df.sort_values(by=['Unique_ID', 'PricingDate'], inplace=True)
+# Charger le DataFrame
+df = pd.read_csv('votre_fichier.csv')
 
-# Define the float features
-features = ['FloatFeature1', 'FloatFeature2', 'FloatFeature3', 'FloatFeature4', 'FloatFeature5']
+# Inspecter les premières lignes du DataFrame
+print("Aperçu des premières lignes du DataFrame :")
+print(df.head())
 
-# Function to calculate R^2 and plot regression
-def plot_regression(data, features):
-    results = []
-    
-    # Shift each feature by one day to align yesterday's features with today
-    for feature in features:
-        data[f'prev_{feature}'] = data[feature].shift(1)
-    
-    # Drop rows where any previous day's feature data is NaN
-    data = data.dropna(subset=[f'prev_{feature}' for feature in features])
-    
-    # Set up the plot
-    plt.figure(figsize=(12, 8))
-    
-    for feature in features:
-        if len(data) > 1:  # Need at least two data points
-            X = data[[f'prev_{feature}']]
-            y = data[feature]
-            model = LinearRegression()
-            model.fit(X, y)
-            y_pred = model.predict(X)
-            r2 = r2_score(y, y_pred)
-            
-            # Plotting
-            plt.scatter(X, y, label=f'{feature} (R^2={r2:.2f})')
-            plt.plot(X, y_pred, label=f'Fit for {feature}')
-    
-    plt.title(f'Regression Fit for Deal ID: {data.iloc[0]["Unique_ID"]}')
-    plt.xlabel('Previous Day Feature Values')
-    plt.ylabel('Current Day Feature Values')
-    plt.legend()
-    plt.grid(True)
+# Comprendre la structure et les types de données
+print("\nTypes de données dans le DataFrame :")
+print(df.dtypes)
+
+# Analyse descriptive : Calculer les statistiques descriptives pour chaque colonne de type float
+print("\nStatistiques descriptives des colonnes de type float :")
+print(df.describe())
+
+# Visualisation initiale : Créer des visualisations pour chaque variable
+# Histogrammes
+for column in df.select_dtypes(include=['float64']).columns:
+    plt.figure(figsize=(10, 6))
+    sns.histplot(df[column], kde=True, bins=30)
+    plt.title(f'Histogramme de {column}')
+    plt.xlabel(column)
+    plt.ylabel('Fréquence')
     plt.show()
-    
-    return r2
 
-# Apply the function for each deal
-for deal_id, group_data in df.groupby('Unique_ID'):
-    plot_regression(group_data, features)
+# Boxplots
+for column in df.select_dtypes(include=['float64']).columns:
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df[column])
+    plt.title(f'Boxplot de {column}')
+    plt.xlabel(column)
+    plt.show()
