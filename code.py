@@ -1,23 +1,59 @@
-from sklearn.metrics import make_scorer
+from sklearn.ensemble import IsolationForest
+from tqdm import tqdm
+import numpy as np
+from sklearn.model_selection import ParameterGrid
+from sklearn.model_selection import KFold
 
-def custom_scorer(y_true, y_pred):
-    # y_true is binary: 0 for 'NotAnIncident' and 1 for others ('A', 'B', 'C')
-    # y_pred is -1 for an anomaly and 1 for normal
-    anomaly_detected = (y_pred == -1)
-    num_anomalies_detected = np.sum(anomaly_detected)
-    num_true_anomalies = np.sum(y_true == 1)
-    expected_anomalies = num_true_anomalies / 5000
+# Define the parameter grid
+param_grid = {
+    'n_estimators': [100, 200, 300],
+    'max_samples': [100, 200, 'auto'],
+    'contamination': [0.01, 0.02, 0.03, 0.05, 'auto'],
+    'max_features': [1.0, 0.5, 0.75],
+    'bootstrap': [True, False]
+}
 
-    # Penalize the difference between the number of detected anomalies and the expected number
-    anomaly_difference_penalty = np.abs(num_anomalies_detected - expected_anomalies)
+# Initialize cross-validation
+kf = KFold(n_splits=5)
 
-    # Calculate the false positives 'NotAnIncident' identified as anomalies
-    false_positives = np.sum((y_true == 0) & anomaly_detected)
+def evaluate_model(X, y, params):
+    scores = []
+    # Loop through each cross-validation split
+    for train_index, test_index in kf.split(X):
+        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+        y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+        
+        # Create and train the model
+        model = IsolationForest(**params, random_state=42)
+        model.fit(X_train)
+        
+        # Make predictions on the test set
+        y_pred = model.predict(X_test)
+        
+        # Calculate the custom score
+        score = custom_scorer(y_test, y_pred)
+        scores.append(score)
     
-    # Combine the penalties
-    # You can adjust the weights (here 0.5 and 1.0) based on the relative importance you wish to assign
-    score = - (0.5 * anomaly_difference_penalty + 1.0 * false_positives)
-    return score
+    # Calculate the average score across all folds
+    mean_score = np.mean(scores)
+    return mean_score
 
-# Create a custom scorer for GridSearchCV
-scorer = make_scorer(custom_scorer, greater_is_better=True)
+# Generate the parameter grid
+grid = list(ParameterOutrGrid(param_grid))
+
+# Initialize the progress bar
+results = []
+best_score = float('-inf')
+best_params = None
+
+for params in tqdm(grid, desc="Grid Search Progress"):
+    score = evaluate_model(X_train, y_train, params)
+    results.append((score, params))
+    # Update the best score and parameters if the current score is better
+    if score > best_score:
+        best_score = score
+        best_params = params
+
+# Display the best parameters and the best score
+print("Best parameters found: ", best_params)
+print("Best score achieved: ", best_score)
