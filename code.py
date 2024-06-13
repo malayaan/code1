@@ -1,9 +1,8 @@
-import optuna
+# Configuration finale du modèle avec les meilleurs paramètres
+best_model = IsolationForest(**study.best_trial.params)
+best_model.fit(X_train)  # Entraînement sur l'ensemble d'entraînement complet
 
-# Création de l'étude et exécution de l'optimisation
-study = optuna.create_study(direction='maximize')  # ou 'minimize' selon le cas
-study.optimize(objective, n_trials=50, n_jobs=-1)
-
-# Affichage des résultats
-print("Best parameters found: ", study.best_trial.params)
-print("Best score achieved: ", study.best_trial.value)
+# Test sur l'ensemble de test
+y_test_pred = best_model.predict(X_test)
+final_score = custom_scorer(y_test, y_test_pred)
+print("Performance on test set:", final_score)
