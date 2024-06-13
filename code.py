@@ -1,59 +1,33 @@
-from sklearn.ensemble import IsolationForest
-from tqdm import tqdm
+import pandas as pd
 import numpy as np
-from sklearn.model_selection import ParameterGrid
-from sklearn.model_model_selection import KFold
+from sklearn.ensemble import IsolationForest
 
-# Define the parameter grid
-param_grid = {
-    'n_estimators': [100, 200, 300],
-    'max_samples': [100, 200, 'auto'],
-    'contamination': [0.01, 0.02, 0.03, 0.05, 'auto'],
-    'max_features': [1.0, 0.5, 0.75],
-    'bootstrap': [True, False]
-}
+# Example setup, replace with your actual data and model
+X = df.drop('type', axis=1).values
+model = IsolationForest()
+model.fit(X)
+predictions = model.predict(X)
 
-# Initialize cross-validation
-kf = KFold(n_splits=5)
+# Add predictions to DataFrame
+df['anomaly'] = predictions
 
-def evaluate_model(X, y, params):
-    scores = []
-    # Loop through each cross-validation split
-    for train_index, test_index in kf.split(X):
-        X_train, X_test = X[train_index], X[test_index]
-        y_train, y_test = y[train_index], y[test_index]
-        
-        # Create and train the model
-        model = Is oflationForest(**params, random_state=42)
-        model.fit(X_train)
-        
-        # Make predictions on the test set
-        y_pred = model.predict(X_test)
-        
-        # Calculate the custom score
-        score = custom_scorer(y_test, y_pred)
-        scores.append(score)
-    
-    # Calculate the average score across all folds
-    mean_score = np.mean(scores)
-    return mean_score
+# Convert anomaly labels (-1 for anomalies, 1 for normal)
+df['anomaly'] = df['anomaly'].apply(lambda x: 'anomaly' if x == -1 else 'non-anomaly')
 
-# Generate the parameter grid
-grid = list(ParameterGrid(param_grid))
+# Group and count types within each category
+anomaly_counts = df[df['anomaly'] == 'anomaly']['type'].value_counts(normalize=True)
+non_anomaly_counts = df[df['anomaly'] == 'non-anomaly']['type'].value_counts(normalize=True)
 
-# Initialize the progress bar
-results = []
-best_score = float('-inf')
-best_params = None
+import matplotlib.pyplot as plt
 
-for params in tqdm(grid, desc="Grid Search Progress"):
-    score = evaluate_model(X_train, y_train, params)
-    results.append((score, params))
-    # Update the best score and parameters if the current score is better
-    if score > best_score:
-        best_score = score
-        best_params = params
+# Function to plot pie chart for the given data
+def plot_pie_chart(data, title):
+    fig, ax = plt.subplots()
+    ax.pie(data.values, labels=data.index, autopct='%1.1f%%', startangle=90, colors=plt.cm.tab20.colors)
+    ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    plt.title(title)
+    plt.show()
 
-# Display the best parameters and the best score
-print("Best parameters found: ", best_params)
-print("Best score achieved: ", best_score)
+# Plotting pie charts
+plot_pie_chart(anomaly_counts, 'Percentage of Each Type in Anomalies')
+plot_pie_chart(non_anomaly_counts, 'Percentage of Each Type in Non-anomalies')
