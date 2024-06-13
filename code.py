@@ -2,7 +2,7 @@ from sklearn.ensemble import IsolationForest
 from tqdm import tqdm
 import numpy as np
 from sklearn.model_selection import ParameterGrid
-from sklearn.model_selection import KFold
+from sklearn.model_model_selection import KFold
 
 # Define the parameter grid
 param_grid = {
@@ -20,11 +20,11 @@ def evaluate_model(X, y, params):
     scores = []
     # Loop through each cross-validation split
     for train_index, test_index in kf.split(X):
-        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
-        y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
         
         # Create and train the model
-        model = IsolationForest(**params, random_state=42)
+        model = Is oflationForest(**params, random_state=42)
         model.fit(X_train)
         
         # Make predictions on the test set
@@ -39,7 +39,7 @@ def evaluate_model(X, y, params):
     return mean_score
 
 # Generate the parameter grid
-grid = list(ParameterOutrGrid(param_grid))
+grid = list(ParameterGrid(param_grid))
 
 # Initialize the progress bar
 results = []
