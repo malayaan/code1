@@ -1,38 +1,36 @@
-import joblib
 from sklearn.ensemble import IsolationForest
-from sklearn.neighbors import LocalOutlierFactor
-from sklearn.svm import OneClassSVM
-from sklearn.covariance import EllipticEnvelope
-from tqdm import tqdm
 
-# Dictionary of models with configurations
-models = {
-    "Isolation Forest": IsolationForest(n_estimators=100, contamination='auto', random_state=42),
-    "Local Outlier Factor": LocalOutlierFactor(n_neighbors=20, contamination='auto'),  # Handled slightly differently
-    "One-Class SVM": OneClassSVM(kernel='rbf', gamma='auto', nu=0.05),
-    "Elliptic Envelope": EllipticEnvelope(support_fraction=1., contamination='auto')
+# Estimation initiale de contamination
+contamination = sum(y) / len(y)  # Proportion de non-'NotAnIncident' comme anomalies estimées
+iso_forest = IsolationForest(contamination=contamination)
+
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import make_scorer
+
+# Fonction pour calculer le score personnalisé
+def custom_score(y_true, y_pred):
+    # Convertir les prédictions (-1 pour anomalies, 1 pour normal)
+    y_pred = [0 if x == 1 else 1 for x in y_pred]
+    # Calculer combien de 'NotAnIncident' sont faussement identifiés comme anomalies
+    false_positives = sum((y_pred == 1) & (y_true == 0))
+    return -false_positives  # Minimiser le nombre de faux positifs
+
+# Création d'un scorer personnalisé
+scorer = make_scorer(custom_score, greater_is_better=True)
+
+# Grid pour GridSearchCV
+param_grid = {
+    'n_estimators': [50, 100, 200],
+    'max_samples': ['auto', 256, 512],
+    'contamination': [0.01, 0.05, 0.1, 'auto'],
+    'max_features': [0.5, 0.75, 1.0],
+    'bootstrap': [True, False]
 }
 
-# Create a progress bar for the overall process
-total_progress = tqdm(total=len(models), desc="Overall Model Progress")
+# Grid search pour trouver les meilleurs paramètres
+grid_search = GridSearchCV(iso_forest, param_grid, scoring=scorer, cv=3)
+grid_search.fit(X, y)
 
-for model_name, model in models.items():
-    tqdm.write(f"Fitting {model_name}...")  # Printing to stdout with tqdm
-    # Create a dummy progress bar for the fitting process
-    with tqdm(total=1, desc=f"{model_name} Fitting") as progress:
-        if model_name == "Local Outlier Factor":
-            # LOF uses fit_predict and does not require saving a model object
-            predictions = model.fit_predict(X_reduced)
-            tqdm.write(f"{model_name} fitting and predictions complete.")
-        else:
-            # Fit models that require saving
-            model.fit(X_reduced)
-            tqdm.write(f"{model_name} fitting complete.")
-            # Save the fitted model locally
-            joblib.dump(model, f"{model_name.replace(' ', '_')}_model.pkl")
-            tqdm.write(f"{model_name} model saved locally.")
-        progress.update(1)  # Manually update the progress
-    total_progress.update(1)  # Update the overall progress
-
-total_progress.close()
-tqdm.write("All models processed and relevant models saved.")
+# Afficher les meilleurs paramètres et le meilleur score
+print("Best parameters found: ", grid_search.best_params_)
+print("Best score: ", grid_
