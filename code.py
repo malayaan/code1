@@ -13,14 +13,16 @@ df = pd.DataFrame(data)
 print("DataFrame original:")
 print(df)
 
-# Fonction pour déterminer si tous les types d'incidents sont les même
 def determine_type(group):
-    if group['Type_incident'].nunique() == 1:
-        return group['Type_incident'].iloc[0]  # Retourner le type d'incident commun
+    # Comme 'group' est une Series, pas besoin de spécifier la colonne par son nom
+    if group.nunique() == 1:
+        return group.iloc[0]  # Retourne l'unique type d'incident
     else:
-        return 'Unknown'  # Retourner 'Unknown' si divers types d'incidents
+        return 'Unknown'  # Retourne 'Unknown' si divers types d'incidents
+
 
 # Appliquer la logique de détermination de type d'incident et supprimer les doublons
+# Appliquer la fonction de détermination de type d'incident
 df['Type_incident'] = df.groupby(['Ville', 'Quartier', 'Rue'])['Type_incident'].transform(determine_type)
 df = df.drop_duplicates(subset=['Ville', 'Quartier', 'Rue'])
 
