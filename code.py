@@ -1,31 +1,31 @@
 import pandas as pd
+from datetime import datetime
 
-# Création d'un DataFrame exemple
+# Sample dataset with potential inconsistencies
 data = {
-    'Ville': ['Paris', 'Paris', 'Paris', 'Lyon', 'Lyon', 'Lyon'],
-    'Quartier': ['Quartier 1', 'Quartier 1', 'Quartier 1', 'Quartier 2', 'Quartier 2', 'Quartier 2'],
-    'Rue': ['Rue A', 'Rue A', 'Rue C', 'Rue B', 'Rue B', 'ALL'],
-    'Type_incident': ['Feu', 'Inondation', 'Feu', 'Feu', 'Accident', 'Accident']
+    'Date': [datetime(2023, 11, 7), datetime(2023, 8, 11), datetime(2023, 10, 1), datetime(2023, 1, 5), datetime(2023, 6, 4)],
+    'City': ['Nice', 'Paris', 'Paris', 'Marseille', 'Marseille'],
+    'Street': ['Rue de la République', None, 'Avenue des Champs-Élysées', 'Rue de la République', None],
+    'Incident_Type': ['Flood', 'Theft', 'Fire', 'Theft', 'Theft']
 }
-df = pd.DataFrame(data)
 
-# Affichage du DataFrame original
-print("DataFrame original:")
+df = pd.DataFrame(data)
+print("Original DataFrame:")
 print(df)
 
-def determine_type(group):
-    # Comme 'group' est une Series, pas besoin de spécifier la colonne par son nom
-    if group.nunique() == 1:
-        return group.iloc[0]  # Retourne l'unique type d'incident
-    else:
-        return 'Unknown'  # Retourne 'Unknown' si divers types d'incidents
+# Find inconsistencies
+df_city_level = df.drop(columns=['Street']).drop_duplicates()
+df_street_level = df.dropna(subset=['Street']).drop(columns=['Street'])
 
+merged_df = df_city_level.merge(df_street_level, on=['Date', 'City'], suffixes=('_city', '_street'))
+inconsistent_rows = merged_df[merged_df['Incident_Type_city'] != merged_df['Incident_Type_street']]
 
-# Appliquer la logique de détermination de type d'incident et supprimer les doublons
-# Appliquer la fonction de détermination de type d'incident
-df['Type_incident'] = df.groupby(['Ville', 'Quartier', 'Rue'])['Type_incident'].transform(determine_type)
-df = df.drop_duplicates(subset=['Ville', 'Quartier', 'Rue'])
+print("\nRows with inconsistencies:")
+print(inconsistent_rows)
 
-# Affichage du DataFrame après traitement
-print("\nDataFrame après traitement des doublons avec condition sur le type d'incident:")
+# Flag entire city for the inconsistent dates
+for index, row in inconsistent_rows.iterrows():
+    df.loc[(df['Date'] == row['Date']) & (df['City'] == row['City']), 'Incident_Type'] = 'Unknown'
+
+print("\nUpdated DataFrame with Flags:")
 print(df)
