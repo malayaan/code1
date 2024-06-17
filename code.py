@@ -1,30 +1,18 @@
-import pandas as pd
-from datetime import datetime
+# Exclude weekends, New Year's Day, and Christmas Day
+excluded_days = set()
+for single_date in date_range:
+    if single_date.weekday() >= 5:  # Weekend
+        excluded_days.add(single_date)
+    if single_date.month == 1 and single_date.day == 1:  # New Year's Day
+        excluded_days.add(single_date)
+    if single_date.month == 12 and single_date.day == 25:  # Christmas Day
+        excluded_days.add(single_date)
 
-# Sample dataset
-data = {
-    'Date': [datetime(2023, 11, 7), datetime(2023, 8, 11), datetime(2023, 10, 1), datetime(2023, 1, 5), datetime(2023, 6, 4), datetime(2023, 6, 4)],
-    'City': ['Nice', 'Paris', 'Paris', 'Marseille', 'Marseille', 'Paris'],
-    'Street': ['Rue de la République', None, 'Avenue des Champs-Élysées', 'Rue de la République', None, None],
-    'Incident_Type': ['Flood', 'Theft', 'Fire', 'Theft', 'Theft', 'Flood']
-}
+# Convert the 'Date' column to a set of dates with incidents
+incident_dates = set(df['Date'])
 
-df = pd.DataFrame(data)
-print("Original DataFrame:")
-print(df)
+# Find the dates within the date range that do not have incidents and are not excluded
+no_incident_days = [date for date in date_range if date not in incident_dates and date not in excluded_days]
 
-# Create city-level and street-level DataFrames
-df_city_level = df[df['Street'].isna()]
-df_street_level = df.dropna(subset=['Street'])
-
-# Merge city-level and street-level DataFrames on 'Date' and 'City'
-merged_df = df_street_level.merge(df_city_level, on=['Date', 'City'], how='left', indicator=True)
-
-# Filter situations where there are only street-level incidents
-only_street_level = merged_df[merged_df['_merge'] == 'left_only']
-
-# Count unique city-date combinations where there are only street-level incidents
-unique_situations = only_street_level[['Date', 'City']].drop_duplicates().shape[0]
-
-print("\nNumber of situations (city and date) with only street-level incidents and no city-level incidents:")
-print(unique_situations)
+print("\nDays within the date range with no incidents (excluding weekends, New Year's Day, and Christmas Day):")
+print(no_incident_days)
