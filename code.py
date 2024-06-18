@@ -1,52 +1,62 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-from datetime import datetime
+import calendar
 
-# Sample DataFrame with 'date' and 'type' columns
+# Sample DataFrame
 data = {
-    'date': [
-        pd.Timestamp('2024-01-01'),
-        pd.Timestamp('2024-01-02'),
-        pd.Timestamp('2024-01-08'),
-        pd.Timestamp('2024-01-10'),
-        pd.Timestamp('2024-01-11'),
-        pd.Timestamp('2024-02-05'),
-        pd.Timestamp('2024-02-12'),
-        pd.Timestamp('2024-03-01')
+    'Date': [
+        pd.Timestamp('2024-06-05'), pd.Timestamp('2024-06-15'), pd.Timestamp('2024-06-25'),
+        pd.Timestamp('2024-07-10'), pd.Timestamp('2024-07-20'),
+        pd.Timestamp('2024-08-05'), pd.Timestamp('2024-08-15')
     ],
-    'type': ['A', 'B', 'A', 'A', 'B', 'C', 'A', 'C']
+    'Type': ['A', 'B', 'A', 'C', 'A', 'B', 'C']
 }
-
 df = pd.DataFrame(data)
 
-# Dictionary of colors for each type
-colors = {
-    'A': 'red',
-    'B': 'blue',
-    'C': 'green',
-    'NoTAnIncident': 'gray'
+# Dictionary mapping types to ANSI color codes
+type_to_color = {
+    'A': "\033[91m",  # Red
+    'B': "\033[94m",  # Blue
+    'C': "\033[92m"   # Green
 }
+end_color = "\033[0m"  # Reset color
 
-# Create a calendar plot
-fig, ax = plt.subplots(figsize=(10, 8))
+# Define a function to print the calendar with highlighted dates based on type
+def print_highlighted_calendar_with_types(year, start_month, end_month, df, type_to_color):
+    for month in range(start_month, end_month + 1):
+        # Create a calendar
+        cal = calendar.TextCalendar(calendar.SUNDAY)
+        
+        # Generate the calendar for the month
+        cal_str = cal.formatmonth(year, month).split('\n')
+        
+        # Create a dictionary to map dates to types
+        date_to_type = {row['Date'].day: row['Type'] for _, row in df.iterrows() if row['Date'].month == month and row['Date'].year == year}
+        
+        # Modify the calendar string to highlight specific dates based on type
+        for i in range(len(cal_str)):
+            if i > 1:  # Data starts from line 2 in the formatted calendar string
+                line = cal_str[i].split()
+                new_line = []
+                for day in line:
+                    if day.isdigit():
+                        day_int = int(day)
+                        if day_int in date_to_type:
+                            type_color = type_to_color.get(date_to_type[day_int], "")
+                            day = f"{type_color}{day}{end_color}"
+                    new_line.append(day)
+                cal_str[i] = " ".join(new_line)
+        
+        # Print the modified calendar
+        print(f"\nCalendar for {calendar.month_name[month]} {year} with highlighted dates based on type:")
+        for line in cal_str:
+            print(line)
 
-# Plot each date with the corresponding color
-for date, event_type in zip(df['date'], df['type']):
-    ax.plot(date, 0, 'o', color=colors[event_type], markersize=15)
+# Year to display
+year = 2024
 
-# Set the x-axis to display dates correctly
-ax.xaxis.set_major_locator(mdates.MonthLocator())
-ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-ax.xaxis.set_minor_locator(mdates.WeekdayLocator())
-ax.xaxis.set_minor_formatter(mdates.DateFormatter('%d'))
+# Start and end month to display
+start_month = 6  # June
+end_month = 8    # August
 
-# Set grid and labels
-ax.grid(True)
-ax.set_yticks([])
-ax.set_title('Calendar with Events Colored by Type')
-plt.xticks(rotation=90)
-
-# Display the plot
-plt.tight_layout()
-plt.show()
+# Print the calendar for multiple months
+print_highlighted_calendar_with_types(year, start_month, end_month, df, type_to_color)
