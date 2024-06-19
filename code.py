@@ -1,54 +1,92 @@
 import pandas as pd
 import numpy as np
-from nltk.stem import PorterStemmer
-from nltk.tokenize import word_tokenize
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.decomposition import PCA
-import nltk
+from sklearn.model_selection import train_test_split, KFold
+from sklearn.metrics import make_scorer
+from sklearn.ensemble import IsolationForest
+from skopt import BayesSearchCV
+from skopt.space import Real, Integer, Categorical
+from skopt.callbacks import CheckpointSaver, VerboseCallback
+import os
+import logging
 
-# Download necessary NLTK data
-nltk.download('punkt')
+os.chdir(r'C:\Users\pdecroux032524\OneDrive - GROUP DIGITAL WORKPLACE\Documents\Info\dq-incidents-prediction\classifier')
 
-# Sample DataFrame
-data = {'messages': [
-    "This is the first message.",
-    "Here's the second message, which is longer than the first.",
-    "Is this the third message?",
-    "Indeed, this is the fourth message!"
-]}
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logger = logging.getLogger()
 
-df = pd.DataFrame(data)
+# Load data
+x = pd.read_csv('label_anomaly_detection.csv')
+x_reduced = np.load('data.npy')
 
-# Initialize the stemmer
-stemmer = PorterStemmer()
+# Prepare data
+y = x['Type']  # Assuming 'Type' is the target column
+X_train, X_test, y_train, y_test = train_test_split(x_reduced, y, test_size=0.2, random_state=42)
 
-# Function to perform stemming
-def stem_message(message):
-    tokens = word_tokenize(message)
-    stemmed_tokens = [stemmer.stem(token) for token in tokens]
-    return ' '.join(stemmed_tokens)
+# Custom scorer
+def custom_scorer(y_true, y_pred):
+    # Assign 0 for 'NoTAnIncident' and 1 for anomalies
+    y_true = [1 if i == 'anomaly' else 0 for i in y_true]
+    num_true_anomalies = np.sum(y_true)
+    num_anomalies_detected = np.sum(y_pred)
+    anomaly_difference_penalty = np.abs(num_anomalies_detected - num_true_anomalies) / (5000 * 90)
+    false_positives = np.sum((y_true == 0) & (y_pred == 1))
+    score = 0.5 * (anomaly_difference_penalty) + 0.5 * false_positives
+    return score
 
-# Apply stemming to each message
-df['stemmed_messages'] = df['messages'].apply(stem_message)
+scorer = make_scorer(custom_scorer, greater_is_better=False)
 
-# Initialize the TF-IDF vectorizer
-vectorizer = TfidfVectorizer()
+# Initialize cross-validation
+kf = KFold(n_splits=3, shuffle=True, random_state=42)
 
-# Fit and transform the stemmed messages
-X = vectorizer.fit_transform(df['stemmed_messages'])
+# Define the search space
+search_space = {
+    'n_estimators': Integer(100, 300),
+    'max_samples': Integer(50, 200),
+    'contamination': Real(0.01, 0.05),
+    'max_features': Real(0.5, 1.0),
+    'bootstrap': Categorical([True, False])
+}
 
-# Convert to dense array
-X_dense = X.toarray()
+# VerboseCallback to print progress
+verbose_cb = VerboseCallback(n_total=50)
 
-# Compute the covariance matrix
-cov_matrix = np.cov(X_dense, rowvar=False)
+# CheckpointSaver to save progress
+checkpoint_saver = CheckpointSaver("./checkpoint.pkl", compress=9)
 
-# Initialize PCA
-pca = PCA(n_components=2)  # Adjust the number of components as needed
+# BayesSearchCV for hyperparameter tuning
+opt = BayesSearchCV(
+    estimator=IsolationForest(random_state=42),
+    search_spaces=search_space,
+    n_iter=50,
+    scoring=scorer,
+    cv=kf,
+    random_state=42,
+    n_jobs=-1,
+    verbose=1
+)
 
-# Fit and transform the data
-reduced_data = pca.fit_transform(cov_matrix)
+# Fit the optimizer with callbacks
+opt.fit(X_train, y_train, callback=[verbose_cb, checkpoint_saver])
 
-print("Reduced Data Shape:", reduced_data.shape)
-print("Reduced Data:")
-print(reduced_data)
+# Best parameters and score
+best_params = opt.best_params_
+best_score = opt.best_score_
+
+logger.info(f"Best Parameters: {best_params}")
+logger.info(f"Best Score: {best_score}")
+
+# Fit the best model on the entire training data
+best_model = opt.best_estimator_
+best_model.fit(X_train)
+
+# Predict on the test data
+y_pred_test = best_model.predict(X_test)
+
+# Convert -1/1 predictions to 0/1
+y_pred_test = np.where(y_pred_test == -1, 1, 0)
+
+# Evaluate the model
+test_score = custom_scorer(y_test, y_pred_test)
+
+logger.info(f"Test Score: {test_score}")
