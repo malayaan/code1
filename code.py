@@ -1,12 +1,35 @@
-import pandas as pd
+import seaborn as sns
+import matplotlib
+matplotlib.use('TkAgg')  # Ou 'Qt5Agg', 'GTK3Agg' selon votre système et vos préférences
 
-# Création d'un exemple de DataFrame
-data = {
-    'category': ['cat1', 'cat2', 'cat3', 'cat4', 'cat5', 'cat1', 'cat2', 'cat3']
-}
-df = pd.DataFrame(data)
+import matplotlib.pyplot as plt
 
-# Application du One-Hot Encoding
-df_encoded = pd.get_dummies(df, columns=['category'])
+# Exemple de données
+y = [1, 2, 2, 3, 4, 5, 6, 6, 6, 7, 8, 9]
+y_pred = [1, 2, 2, 2, 5, 5, 5, 7, 7, 7, 8, 9]
 
-print(df_encoded)
+# Création d'une heatmap de densité
+plt.figure(figsize=(10, 6))
+sns.kdeplot(x=y, y=y_pred, cmap="Reds", fill=True)
+plt.title('Heatmap de Densité des Prédictions vs Valeurs Réelles')
+plt.xlabel('Valeurs Réelles')
+plt.ylabel('Prédictions')
+
+# Afficher le graphique
+plt.show()
+
+import matplotlib.pyplot as plt
+
+# Exemple de données
+y = [1, 2, 2, 3, 4, 5, 6, 6, 6, 7, 8, 9]
+y_pred = [1, 2, 2, 2, 5, 5, 5, 7, 7, 7, 8, 9]
+
+plt.figure(figsize=(10, 6))
+plt.hexbin(y, y_pred, gridsize=30, cmap='Reds', bins='log')
+plt.colorbar(label='log10(N)')
+plt.title('Hexbin Plot des Prédictions vs Valeurs Réelles')
+plt.xlabel('Valeurs Réelles')
+plt.ylabel('Prédictions')
+
+# Afficher le graphique
+plt.show()
