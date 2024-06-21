@@ -1,35 +1,34 @@
-import seaborn as sns
-import matplotlib
-matplotlib.use('TkAgg')  # Ou 'Qt5Agg', 'GTK3Agg' selon votre système et vos préférences
+import pandas as pd
+import numpy as np
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
-import matplotlib.pyplot as plt
+# Exemple de DataFrame
+data = {
+    'product_name': ['prod1', 'prod2', 'prod3', 'prod1', 'prod2'],
+    'product_type': ['type1', 'type1', 'type2', 'type2', 'type3'],
+    'perimetre': ['perim1', 'perim1', 'perim2', 'perim3', 'perim1']
+}
+df = pd.DataFrame(data)
 
-# Exemple de données
-y = [1, 2, 2, 3, 4, 5, 6, 6, 6, 7, 8, 9]
-y_pred = [1, 2, 2, 2, 5, 5, 5, 7, 7, 7, 8, 9]
+# Compter les cooccurrences pour chaque product_type et perimetre
+def get_cooccurrence_matrix(df, col):
+    df['count'] = 1
+    # Utilisation de crosstab pour créer une matrice produit par produit pour chaque groupe
+    co_occurrence = df.pivot_table(index='product_name', columns='product_name', 
+                                   values='count', aggfunc='sum', fill_value=0)
+    # Assurez-vous que la diagonale est à zéro pour ne pas compter les produits avec eux-mêmes
+    np.fill_diagonal(co_occurrence.values, 0)
+    return co_occurrence
 
-# Création d'une heatmap de densité
-plt.figure(figsize=(10, 6))
-sns.kdeplot(x=y, y=y_pred, cmap="Reds", fill=True)
-plt.title('Heatmap de Densité des Prédictions vs Valeurs Réelles')
-plt.xlabel('Valeurs Réelles')
-plt.ylabel('Prédictions')
+# Poids pour product_type
+type_co_occurrence = df.groupby('product_type').apply(lambda x: get_cooccurrence_matrix(x, 'product_type')).sum(level=0)
 
-# Afficher le graphique
-plt.show()
+# Poids pour perimetre, pondéré double
+perim_co_occurrence = df.groupby('perimetre').apply(lambda x: get_cooccurrence_matrix(x, 'perimetre') * 2).sum(level=0)
 
-import matplotlib.pyplot as plt
+# Somme pondérée des deux matrices
+weighted_co_occurrence = type_co_occurrence + perim_co_occurrence
 
-# Exemple de données
-y = [1, 2, 2, 3, 4, 5, 6, 6, 6, 7, 8, 9]
-y_pred = [1, 2, 2, 2, 5, 5, 5, 7, 7, 7, 8, 9]
-
-plt.figure(figsize=(10, 6))
-plt.hexbin(y, y_pred, gridsize=30, cmap='Reds', bins='log')
-plt.colorbar(label='log10(N)')
-plt.title('Hexbin Plot des Prédictions vs Valeurs Réelles')
-plt.xlabel('Valeurs Réelles')
-plt.ylabel('Prédictions')
-
-# Afficher le graphique
-plt.show()
+print("Matrice de cooccurrence pondérée :")
+print(weighted_co_occurrence)
