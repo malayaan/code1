@@ -10,11 +10,18 @@ data = {
 # Conversion en DataFrame
 df = pd.DataFrame(data)
 
-# Création de la matrice d'incidence entre product_name et product_type
-incidence_matrix = pd.crosstab(df['product_name'], df['product_type'])
+# Matrice d'incidence pour product_type
+incidence_type = pd.crosstab(df['product_name'], df['product_type'])
 
-# Calcul de la matrice de cooccurrence
-cooccurrence_matrix = incidence_matrix.dot(incidence_matrix.T)
+# Matrice d'incidence pour perimetre
+incidence_perimetre = pd.crosstab(df['product_name'], df['perimetre'])
 
-# Les valeurs sur la diagonale seront le nombre de product_types uniques que chaque product_name apparaît
-print(cooccurrence_matrix)
+# Calcul des matrices de cooccurrence
+cooccurrence_type = incidence_type.dot(incidence_type.T)
+cooccurrence_perimetre = incidence_perimetre.dot(incidence_perimetre.T)
+
+# Addition des deux matrices de cooccurrence
+cooccurrence_combined = cooccurrence_type + cooccurrence_perimetre
+
+# Affichage de la matrice combinée
+print(cooccurrence_combined)
