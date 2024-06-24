@@ -1,27 +1,43 @@
 import pandas as pd
+import numpy as np
 
-# Données initiales
+# Nombre de données
+n_data = 4000000
+
+# Génération de données fictives
+np.random.seed(42)
 data = {
-    'product_name': ['prod1', 'prod2', 'prod3', 'prod1', 'prod2'],
-    'product_type': ['type1', 'type1', 'type2', 'type2', 'type3'],
-    'perimetre': ['perim1', 'perim1', 'perim2', 'perim3', 'perim1']
+    'product_name': np.random.choice(['prod1', 'prod2', 'prod3', 'prod4', 'prod5'], n_data),
+    'product_type': np.random.choice(['type1', 'type2', 'type3'], n_data),
+    'perimetre': np.random.choice(['perim1', 'perim2', 'perim3'], n_data)
 }
 
-# Conversion en DataFrame
 df = pd.DataFrame(data)
 
-# Matrice d'incidence pour product_type
-incidence_type = pd.crosstab(df['product_name'], df['product_type'])
+# Taille de chaque lot
+batch_size = 100000
 
-# Matrice d'incidence pour perimetre
-incidence_perimetre = pd.crosstab(df['product_name'], df['perimetre'])
+# Fonction pour traiter chaque lot
+def process_batch(sub_df):
+    incidence_type = pd.crosstab(sub_df['product_name'], sub_df['product_type'])
+    incidence_perimetre = pd.crosstab(sub_df['product_name'], sub_df['perimetre'])
+    cooccurrence_type = incidence_type.dot(incidence_type.T)
+    cooccurrence_perimetre = incidence_perimetre.dot(incidence_perimetre.T)
+    return cooccurrence_type + cooccurrence_perimetre
 
-# Calcul des matrices de cooccurrence
-cooccurrence_type = incidence_type.dot(incidence_type.T)
-cooccurrence_perimetre = incidence_perimetre.dot(incidence_perimetre.T)
+# Traitement par lots
+results = []
+for start in range(0, n_data, batch_size):
+    end = start + batch_size
+    batch_df = df[start:end]
+    result = process_batch(batch_df)
+    results.append(result)
+    # Calcul et affichage de la progression
+    progress = (start + batch_size) * 100 / n_data
+    print(f"Progress: {progress:.2f}% completed")
 
-# Addition des deux matrices de cooccurrence
-cooccurrence_combined = cooccurrence_type + cooccurrence_perimetre
+# Fusion des résultats
+final_result = sum(results)
 
-# Affichage de la matrice combinée
-print(cooccurrence_combined)
+# Affichage de la matrice finale de cooccurrence
+print(final_result)
