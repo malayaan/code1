@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 # Nombre de données
-n_data = 4000000
+n_data = 1000
 
 # Génération de données fictives
 np.random.seed(42)
@@ -14,15 +14,24 @@ data = {
 
 df = pd.DataFrame(data)
 
+# Liste unique de tous les product_name
+unique_products = df['product_name'].unique()
+
 # Taille de chaque lot
-batch_size = 100000
+batch_size = 100
 
 # Fonction pour traiter chaque lot
-def process_batch(sub_df):
+def process_batch(sub_df, all_products):
     incidence_type = pd.crosstab(sub_df['product_name'], sub_df['product_type'])
     incidence_perimetre = pd.crosstab(sub_df['product_name'], sub_df['perimetre'])
-    cooccurrence_type = incidence_type.dot(incidence_type.T)
-    cooccurrence_perimetre = incidence_perimetre.dot(incidence_perimetre.T)
+
+    # Assure que toutes les matrices ont les mêmes indices et colonnes
+    incidence_type = incidence_type.reindex(index=all_products, columns=all_products, fill_value=0)
+    incidence_perimetre = incidence_perimetre.reindex(index=all_products, columns=all_products, fill_value=0)
+
+    cooccurrence_type = incidence_type.dot(incidence_type.T).reindex(index=all_products, columns=all_products, fill_value=0)
+    cooccurrence_perimetre = incidence_perimetre.dot(incidence_perimetre.T).reindex(index=all_products, columns=all_products, fill_value=0)
+
     return cooccurrence_type + cooccurrence_perimetre
 
 # Traitement par lots
@@ -30,35 +39,16 @@ results = []
 for start in range(0, n_data, batch_size):
     end = start + batch_size
     batch_df = df[start:end]
-    result = process_batch(batch_df)
+    result = process_batch(batch_df, unique_products)
     results.append(result)
     # Calcul et affichage de la progression
     progress = (start + batch_size) * 100 / n_data
     print(f"Progress: {progress:.2f}% completed")
 
 # Fusion des résultats
-final_result = sum(results)
+final_result = pd.DataFrame(0, index=unique_products, columns=unique_products)
+for matrix in results:
+    final_result += matrix
 
-from sklearn.decomposition import PCA
-
-# Assumons que final_result est correctement calculé et bien aligné
-# Conversion du DataFrame final en matrice numpy pour PCA
-data_matrix = final_result.values
-
-# Initialisation de PCA pour réduire les dimensions à 3
-pca = PCA(n_components=3)
-
-# Ajustement de PCA sur les données et transformation
-reduced_data = pca.fit_transform(data_matrix)
-
-# Création d'un nouveau DataFrame à partir des données réduites
-reduced_df = pd.DataFrame(reduced_data, columns=['PC1', 'PC2', 'PC3'], index=final_result.index)
-
-# Affichage de la matrice réduite
-print("Matrice réduite :")
-print(reduced_df)
-
-# (Optionnel) Affichage de la variance expliquée par chaque composante
-print("Variance expliquée par chaque composante :")
-print
-
+# Affichage de la matrice finale de cooccurrence
+print(final_result)
