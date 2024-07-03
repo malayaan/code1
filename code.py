@@ -1,26 +1,14 @@
-from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.loggers import TensorBoardLogger
+import torch
 
-# Configuration du ModelCheckpoint
-checkpoint_callback = ModelCheckpoint(
-    dirpath='checkpoints',
-    filename='best-checkpoint',
-    save_top_k=1,
-    verbose=True,
-    monitor='val_loss',
-    mode='min'
-)
+# Vérifie si CUDA est disponible
+cuda_available = torch.cuda.is_available()
+print("CUDA disponible:", cuda_available)
 
-# Configuration du TensorBoardLogger
-logger = TensorBoardLogger("lightning_logs", name="surface-sequences")
-
-# Configuration du Trainer avec le callback intégré et spécification pour l'usage de GPU
-trainer = pl.Trainer(
-    logger=logger,
-    callbacks=[checkpoint_callback],
-    max_epochs=n_epochs,
-    accelerator='gpu',  # Spécifie que l'accélération par GPU est requise
-    devices=1,  # Utilisation d'un GPU
-    enable_progress_bar=True  # Active la barre de progression pour visualiser l'avancement de l'entraînement
-)
+# Affiche le nombre de GPU disponibles et leurs noms si CUDA est disponible
+if cuda_available:
+    num_gpus = torch.cuda.device_count()
+    print("Nombre de GPU(s) disponible(s):", num_gpus)
+    for i in range(num_gpus):
+        print(f"GPU {i}: {torch.cuda.get_device_name(i)}")
+else:
+    print("Aucun GPU compatible CUDA n'est disponible.")
