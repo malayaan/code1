@@ -1,5 +1,1 @@
-pip uninstall torch torchvision torchaudio
-pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu123
-import torch
-print(torch.__version__)
-print(torch.cuda.is_available())
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
