@@ -1,22 +1,19 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
-# Création d'un DataFrame exemple
-data = {'date': pd.to_datetime(['2023-06-01', '2023-06-03', '2023-06-05', '2023-06-07'])}
-df = pd.DataFrame(data)
+# Supposons que df_incident est votre DataFrame
+type_gop_distribution = pd.crosstab(df_incident['gop'], df_incident['type'])
 
-# Calcul de la date min et max
-min_date = df['date'].min()
-max_date = df['date'].max()
+# Calculer la somme des incidents pour chaque type et trier les valeurs
+top_types = type_gop_distribution.sum(axis=0).sort_values(ascending=False).head(10)
 
-# Génération de toutes les dates ouvrables entre min et max
-all_business_days = pd.date_range(start=min_date, end=max_date, freq='B')
+# Filtrer le DataFrame original pour ne garder que les top types
+filtered_gop_distribution = type_gop_distribution[top_types.index]
 
-# Identification des dates manquantes
-dates_in_df = pd.DataFrame(df['date'])
-missing_dates = all_business_days[~all_business_days.isin(dates_in_df['date'])]
-
-# Création du DataFrame des dates manquantes
-df_missing_dates = pd.DataFrame(missing_dates, columns=['Missing Dates'])
-
-# Affichage du DataFrame des dates manquantes
-print(df_missing_dates)
+# Créer le graphique
+filtered_gop_distribution.plot(kind='bar', stacked=True, figsize=(10,5))
+plt.title('Composition of incident type by gop (Top 10 Total Incidents)')
+plt.xlabel('GOP')
+plt.ylabel('Incidents count')
+plt.xticks(rotation=0)
+plt.show()
