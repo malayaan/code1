@@ -1,47 +1,41 @@
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.ensemble import IsolationForest
+from mpl_toolkits.mplot3d import Axes3D
 
-# Créer un DataFrame avec des dates sur un mois
-dates = pd.date_range(start='2023-01-01', periods=30, freq='D')
-df = pd.DataFrame(index=dates)
+# Générer des données en forme de sablier
+np.random.seed(42)
+x = np.random.normal(0, 1, 500)
+y = np.random.normal(0, 1, 500)
+z = x ** 2 - y ** 2
 
-# Générer des séries temporelles avec une tendance croissante et de la volatilité
-np.random.seed(42)  # Pour la reproductibilité
-trend = np.linspace(1, 10, 30)
+# Combine x, y, z in a single array
+X = np.vstack((x, y, z)).T
 
-# PnL - Profit and Loss
-df['PnL'] = trend + np.random.normal(scale=1.5, size=30)  # Réduire la volatilité
+# Utiliser Isolation Forest pour détecter les anomalies
+clf = IsolationForest(random_state=42, contamination=0.1)
+preds = clf.fit_predict(X)
+scores = clf.decision_function(X)
 
-# VV - Valeur avec les placements d'hier
-df['VV'] = trend * 1.2 + np.random.normal(scale=1.5, size=30)
+# Créer la figure 3D
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
 
-# VJ - Valeur avec les actions d'aujourd'hui
-df['VJ'] = trend * 1.1 + np.random.normal(scale=1.5, size=30)
+# Points normaux
+ax.scatter(X[preds == 1, 0], X[preds == 1, 1], X[preds == 1, 2], c='red', label='Normal')
 
-# Theta Effect
-df['Theta'] = trend * 0.8 + np.random.normal(scale=1.5, size=30)
+# Anomalies
+ax.scatter(X[preds == -1, 0], X[preds == -1, 1], X[preds == -1, 2], c='black', label='Anomaly')
 
-# Introduire des anomalies (6 anomalies, moins extrêmes)
-anomaly_indices = np.random.choice(df.index, size=6, replace=False)
-df.loc[anomaly_indices, 'PnL'] += np.random.normal(5, 2, size=6)  # Réduire l'impact des anomalies
-df.loc[anomaly_indices, 'VV'] += np.random.normal(5, 2, size=6)
-df.loc[anomaly_indices, 'VJ'] -= np.random.normal(5, 2, size=6)
-df.loc[anomaly_indices, 'Theta'] += np.random.normal(5, 2, size=6)
+# Configurer les étiquettes et la légende
+ax.set_xlabel('X coordinate')
+ax.set_ylabel('Y coordinate')
+ax.set_zlabel('Z coordinate')
+ax.legend()
 
-# Couleurs en nuances de rouge
-colors = ['darkred', 'red', 'salmon', 'lightcoral']
+# Ajouter des lignes pour illustrer la liaison entre les centroids
+centroids = np.array([X[preds == 1].mean(axis=0), X[preds == -1].mean(axis=0)])
+ax.plot(centroids[:, 0], centroids[:, 1], centroids[:, 2], 'k-', linewidth=2)
 
-# Affichage des séries temporelles
-plt.figure(figsize=(14, 7))
-for i, column in enumerate(df.columns):
-    plt.plot(df.index, df[column], label=column, color=colors[i])
-    # Marquer les anomalies avec des points noirs
-    plt.scatter(df.loc[anomaly_indices, column].index, df.loc[anomaly_indices, column], color='black', s=50)
-
-plt.legend()
-plt.title('Simulated Portfolio Time Series with Adjusted Anomalies')
-plt.xlabel('Date')
-plt.ylabel('Value')
-plt.grid(True)
+plt.title('3D Visualization of Isolation Forest Anomaly Detection')
 plt.show()
