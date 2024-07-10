@@ -1,19 +1,26 @@
-import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, roc_curve
 
-# Supposons que df_incident est votre DataFrame
-type_gop_distribution = pd.crosstab(df_incident['gop'], df_incident['type'])
+# Supposons que model est déjà entraîné et que X_test et y_test sont définis
+# Obtenir les scores de probabilité pour la classe positive
+y_scores = model.predict_proba(X_test)[:, 1]
 
-# Calculer la somme des incidents pour chaque gop (somme sur les colonnes pour chaque gop, axis=1)
-top_gops = type_gop_distribution.sum(axis=1).sort_values(ascending=False).head(10)
+# Calculer les taux pour la courbe ROC
+fpr, tpr, thresholds = roc_curve(y_test, y_scores)
 
-# Filtrer le DataFrame original pour ne garder que les top gops
-filtered_gop_distribution = type_gop_distribution.loc[top_gops.index]
-
-# Créer le graphique
-filtered_gop_distribution.plot(kind='bar', stacked=True, figsize=(10,5))
-plt.title('Composition of incident by top 10 GOPs')
-plt.xlabel('GOP')
-plt.ylabel('Incidents count')
-plt.xticks(rotation=0)
-plt.show()
+# Itérer sur tous les seuils obtenus de la courbe ROC
+for i, threshold in enumerate(thresholds):
+    # Convertir les scores de probabilité en prédictions binaires basées sur le seuil
+    y_pred_threshold = (y_scores >= threshold).astype(int)
+    
+    # Calculer la matrice de confusion pour ce seuil
+    cm = confusion_matrix(y_test, y_pred_threshold)
+    
+    # Afficher la matrice de confusion
+    plt.figure(figsize=(5, 4))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", cbar=False)
+    plt.title(f'Seuil: {threshold:.2f}')
+    plt.xlabel('Prédictions')
+    plt.ylabel('Véritables étiquettes')
+    plt.show()
