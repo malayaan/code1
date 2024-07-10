@@ -1,41 +1,22 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.ensemble import IsolationForest
-from mpl_toolkits.mplot3d import Axes3D
+import pandas as pd
 
-# Générer des données en forme de sablier
-np.random.seed(42)
-x = np.random.normal(0, 1, 500)
-y = np.random.normal(0, 1, 500)
-z = x ** 2 - y ** 2
+# Exemple de création de DataFrame
+data = {
+    'ptf': ['A', 'A', 'A', 'B', 'B', 'B'],
+    'date': pd.to_datetime(['2023-01-01', '2023-01-03', '2023-01-04', '2023-01-01', '2023-01-02', '2023-01-05']),
+    'feature1': [1, 2, 3, 1, 2, 3],
+    'feature2': [4, 5, 6, 4, 5, 6]
+}
+df = pd.DataFrame(data)
 
-# Combine x, y, z in a single array
-X = np.vstack((x, y, z)).T
+# Assurer que la colonne 'date' est de type datetime
+df['date'] = pd.to_datetime(df['date'])
 
-# Utiliser Isolation Forest pour détecter les anomalies
-clf = IsolationForest(random_state=42, contamination=0.1)
-preds = clf.fit_predict(X)
-scores = clf.decision_function(X)
+# Group by 'ptf' and get first and last date
+summary = df.groupby('ptf')['date'].agg(['min', 'max']).reset_index()
 
-# Créer la figure 3D
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
+# Trouver les jours manquants pour chaque portefeuille
+summary['missing_days'] = summary.apply(lambda row: pd.date_range(start=row['min'], end=row['max']).difference(df[df['ptf'] == row['ptf']]['date']).tolist(), axis=1)
 
-# Points normaux
-ax.scatter(X[preds == 1, 0], X[preds == 1, 1], X[preds == 1, 2], c='red', label='Normal')
-
-# Anomalies
-ax.scatter(X[preds == -1, 0], X[preds == -1, 1], X[preds == -1, 2], c='black', label='Anomaly')
-
-# Configurer les étiquettes et la légende
-ax.set_xlabel('X coordinate')
-ax.set_ylabel('Y coordinate')
-ax.set_zlabel('Z coordinate')
-ax.legend()
-
-# Ajouter des lignes pour illustrer la liaison entre les centroids
-centroids = np.array([X[preds == 1].mean(axis=0), X[preds == -1].mean(axis=0)])
-ax.plot(centroids[:, 0], centroids[:, 1], centroids[:, 2], 'k-', linewidth=2)
-
-plt.title('3D Visualization of Isolation Forest Anomaly Detection')
-plt.show()
+# Affichage du résultat
+print(summary)
