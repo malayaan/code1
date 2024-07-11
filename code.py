@@ -1,22 +1,20 @@
-import pandas as pd
+import category_encoders as ce
 
-# Exemple de création de DataFrame
-data = {
-    'ptf': ['A', 'A', 'A', 'B', 'B', 'B'],
-    'date': pd.to_datetime(['2023-01-01', '2023-01-03', '2023-01-04', '2023-01-01', '2023-01-02', '2023-01-05']),
-    'feature1': [1, 2, 3, 1, 2, 3],
-    'feature2': [4, 5, 6, 4, 5, 6]
-}
-df = pd.DataFrame(data)
+# Supposons que X_train, X_test, y_train, y_test sont déjà définis
+# et que 'col1' et 'col2' sont les colonnes catégorielles dans X_train et X_test.
 
-# Assurer que la colonne 'date' est de type datetime
-df['date'] = pd.to_datetime(df['date'])
+# Initialisation de l'encodeur avec la spécification des colonnes à encoder
+encoder = ce.TargetEncoder(cols=['col1', 'col2'])
 
-# Group by 'ptf' and get first and last date
-summary = df.groupby('ptf')['date'].agg(['min', 'max']).reset_index()
+# Fit l'encodeur uniquement sur les données d'entraînement
+encoder.fit(X_train, y_train)
 
-# Trouver les jours manquants pour chaque portefeuille
-summary['missing_days'] = summary.apply(lambda row: pd.date_range(start=row['min'], end=row['max']).difference(df[df['ptf'] == row['ptf']]['date']).tolist(), axis=1)
+# Transformer les données d'entraînement et de test
+X_train_encoded = encoder.transform(X_train)
+X_test_encoded = encoder.transform(X_test)
 
-# Affichage du résultat
-print(summary)
+# Vérification des données encodées
+print(X_train_encoded.head())
+print(X_test_encoded.head())
+
+pip install category_encoders
