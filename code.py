@@ -1,20 +1,40 @@
-import dask.dataframe as dd
-from dask.diagnostics import ProgressBar
-import category_encoders as ce
+import pandas as pd
 
-# Charger les données en DataFrame Dask
-ddf = dd.read_csv('your_large_file.csv')
+# Simulation des données d'entraînement et de test
+data_train = {
+    'underlyingtype': ['Equity', 'Bond', 'Equity', 'Bond', 'Equity', 'Bond'],
+    'producttype': ['Option', 'Future', 'Option', 'Future', 'Option', 'Future'],
+    'type': ['Incident', 'No Incident', 'No Incident', 'Incident', 'Incident', 'No Incident']
+}
+data_test = {
+    'underlyingtype': ['Equity', 'Bond', 'Equity', 'Bond'],
+    'producttype': ['Option', 'Future', 'Option', 'Future'],
+    'type': ['Incident', 'Incident', 'No Incident', 'No Incident']
+}
 
-# Convertir les colonnes catégorielles en type 'category'
-ddf['col1'] = ddf['col1'].astype('category')
-ddf['col2'] = ddf['col2'].astype('category')
+X_train = pd.DataFrame(data_train)
+y_train = X_train.pop('type')  # Si 'type' est la cible, nous devons l'encoder numériquement pour le mean encoding
+X_test = pd.DataFrame(data_test)
+y_test = X_test.pop('type')
 
-# Encoder avec Dask (exemple fictif, adapter selon besoin)
-encoder = ce.TargetEncoder(cols=['col1', 'col2'])
+# Mapping des types d'incidents en valeurs numériques pour y_train
+type_mapping = {'Incident': 1, 'No Incident': 0}
+y_train = y_train.map(type_mapping)
+y_test = y_test.map(type_mapping)
 
-with ProgressBar():
-    # Fit et transform sont effectués en parallèle
-    ddf_encoded = encoder.fit_transform(ddf.categorize(columns=['col1', 'col2']), ddf['y'])
+# Calcul du mean encoding pour 'underlyingtype' et 'producttype' en utilisant y_train
+mean_encode_underlying = X_train.groupby('underlyingtype')['type'].mean()
+mean_encode_product = X_train.groupby('producttype')['type'].mean()
 
-# Calculer et convertir en pandas DataFrame si nécessaire
-df_encoded = ddf_encoded.compute()
+# Appliquer le mean encoding sur X_train et X_test
+X_train['underlyingtype_encoded'] = X_train['underlyingtype'].map(mean_encode_underlying)
+X_train['producttype_encoded'] = X_train['producttype'].map(mean_encode_product)
+
+X_test['underlyingtype_encoded'] = X_test['underlyingtype'].map(mean_encode_underlying)
+X_test['producttype_encoded'] = X_test['producttype'].map(mean_encode_product)
+
+# Affichage des DataFrames après l'encodage
+print("X_train with mean encoding:")
+print(X_train)
+print("\nX_test with mean encoding:")
+print(X_test)
