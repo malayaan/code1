@@ -1,20 +1,20 @@
+import dask.dataframe as dd
+from dask.diagnostics import ProgressBar
 import category_encoders as ce
 
-# Supposons que X_train, X_test, y_train, y_test sont déjà définis
-# et que 'col1' et 'col2' sont les colonnes catégorielles dans X_train et X_test.
+# Charger les données en DataFrame Dask
+ddf = dd.read_csv('your_large_file.csv')
 
-# Initialisation de l'encodeur avec la spécification des colonnes à encoder
+# Convertir les colonnes catégorielles en type 'category'
+ddf['col1'] = ddf['col1'].astype('category')
+ddf['col2'] = ddf['col2'].astype('category')
+
+# Encoder avec Dask (exemple fictif, adapter selon besoin)
 encoder = ce.TargetEncoder(cols=['col1', 'col2'])
 
-# Fit l'encodeur uniquement sur les données d'entraînement
-encoder.fit(X_train, y_train)
+with ProgressBar():
+    # Fit et transform sont effectués en parallèle
+    ddf_encoded = encoder.fit_transform(ddf.categorize(columns=['col1', 'col2']), ddf['y'])
 
-# Transformer les données d'entraînement et de test
-X_train_encoded = encoder.transform(X_train)
-X_test_encoded = encoder.transform(X_test)
-
-# Vérification des données encodées
-print(X_train_encoded.head())
-print(X_test_encoded.head())
-
-pip install category_encoders
+# Calculer et convertir en pandas DataFrame si nécessaire
+df_encoded = ddf_encoded.compute()
