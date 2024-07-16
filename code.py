@@ -1,13 +1,11 @@
-Madame, Monsieur,
+Bonjour [Nom du Responsable],
 
-Je suis actuellement en stage chez Société Générale sous la direction de Nathalie Sertier de GBTO/FRM/RPC, qui soutient ma candidature pour le poste de Data Scientist au Datalab IGAD. Ma formation et mes expériences antérieures m'ont permis de développer une compréhension approfondie des enjeux du secteur financier et des compétences avancées en data science, notamment en machine learning et analyse prédictive.
+J’espère que vous allez bien. Je voulais vous informer que j'ai postulé pour le poste au Data Lab CPLE. Avec mon expérience chez Société Générale et mes compétences en data science, je suis très motivé à l'idée de rejoindre votre équipe.
 
-Au cours de mon stage, j'ai été proactive dans l'identification et la compréhension des besoins métiers, ce qui m'a permis de développer des solutions innovantes face aux défis techniques rencontrés. Ma capacité à établir des liens significatifs avec les parties prenantes métier a été essentielle pour donner un sens pratique à mes projets.
+Pouvons-nous discuter de ma candidature à votre convenance ? Je suis convaincu que je pourrais apporter une contribution significative au lab.
 
-Je suis attiré par ce poste car il représente une opportunité unique de mettre à profit mes connaissances techniques et mon expérience du secteur bancaire de la Société Générale pour contribuer efficacement à vos objectifs. Je suis confiant que mes solides bases en finance de marché et mes compétences analytiques me permettront d'apporter une valeur ajoutée significative à votre équipe.
+Merci pour votre temps et considération.
 
-Je serais ravi de vous rencontrer pour discuter plus en détail de ma candidature et de la manière dont je peux contribuer au Datalab IGAD. Je vous remercie pour l'opportunité de postuler et espère pouvoir apporter ma contribution à vos projets.
-
-Veuillez agréer, Madame, Monsieur, l'expression de mes salutations distinguées.
+Cordialement,
 
 Paul Decroux
