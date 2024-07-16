@@ -1,11 +1,7 @@
-Bonjour [Nom du Responsable],
-
-J’espère que vous allez bien. Je voulais vous informer que j'ai postulé pour le poste au Data Lab CPLE. Avec mon expérience chez Société Générale et mes compétences en data science, je suis très motivé à l'idée de rejoindre votre équipe.
-
-Pouvons-nous discuter de ma candidature à votre convenance ? Je suis convaincu que je pourrais apporter une contribution significative au lab.
-
-Merci pour votre temps et considération.
-
-Cordialement,
-
-Paul Decroux
+# Création du graphique de densité
+plt.figure(figsize=(8, 6))
+sns.kdeplot(x=df['col1'], y=df['col2'], cmap="Reds", fill=True)
+plt.title('Heatmap de densité des points')
+plt.xlabel('Colonne 1')
+plt.ylabel('Colonne 2')
+plt.show()
