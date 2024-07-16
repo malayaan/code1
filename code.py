@@ -1,27 +1,39 @@
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-# Créer des données de test
 import pandas as pd
-import numpy as np
 
-# Supposons que df est votre DataFrame avec les coordonnées
-np.random.seed(10)
-df = pd.DataFrame({
-    'col1': np.random.normal(loc=0, scale=1, size=300),
-    'col2': np.random.normal(loc=0, scale=1, size=300)
+# Exemple de création des DataFrames
+df_train = pd.DataFrame({
+    'name': ['Alice', 'Bob', 'Charlie'],
+    'other_info': [1, 2, 3]
 })
 
-# Création du graphique de densité
-plt.figure(figsize=(8, 6))
-# Stocker le résultat dans une variable pour accéder à la barre de couleur
-ax = sns.kdeplot(x=df['col1'], y=df['col2'], cmap="Reds", fill=True)
-plt.title('Heatmap de densité des points')
-plt.xlabel('Colonne 1')
-plt.ylabel('Colonne 2')
+df_test = pd.DataFrame({
+    'name': ['Alice', 'Dave', 'Eve']
+})
 
-# Ajouter la barre de couleur avec une légende
-colorbar = plt.colorbar(ax.collections[0])
-colorbar.set_label('Densité')
+df_dico = pd.DataFrame({
+    'name': ['Alice', 'Charlie', 'Eve', 'Luc'],
+    'emb1': [0.1, 0.2, 0.3, 2],
+    'emb2': [0.4, 0.5, 0.6, 5],
+    'emb3': [0.7, 0.8, 0.9, 8]
+})
 
-plt.show()
+# Filtrer df_dico pour ne conserver que les noms présents dans df_train ou df_test
+names_in_use = pd.concat([df_train['name'], df_test['name']]).unique()
+df_dico_filtered = df_dico[df_dico['name'].isin(names_in_use)]
+
+# Fusion des DataFrames avec df_dico filtré
+df_train = df_train.merge(df_dico_filtered, on='name', how='left')
+df_test = df_test.merge(df_dico_filtered, on='name', how='left')
+
+# Calcul de l'embedding médian pour df_train
+median_emb = df_train[['emb1', 'emb2', 'emb3']].median()
+
+# Remplacement des NaN par l'embedding médian dans df_train et df_test
+df_train[['emb1', 'emb2', 'emb3']] = df_train[['emb1', 'emb2', 'emb3']].fillna(median_emb)
+df_test[['emb1', 'emb2', 'emb3']] = df_test[['emb1', 'emb2', 'emb3']].fillna(median_emb)
+
+# Affichage des résultats
+print("DataFrame Train après traitement des NaN:")
+print(df_train)
+print("\nDataFrame Test après traitement des NaN:")
+print(df_test)
