@@ -1,21 +1,41 @@
+import os
 import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
 
-# Création d'un DataFrame avec deux colonnes de coordonnées générées aléatoirement
-np.random.seed(0)
-data = {
-    'x': np.random.normal(0, 1, 1000),
-    'y': np.random.normal(0, 1, 1000)
-}
-df = pd.DataFrame(data)
+class DataProcessor:
+    def __init__(self, folder_path):
+        self.folder_path = folder_path
 
-# Affichage de la carte de densité avec légende
-plt.figure(figsize=(10, 6))
-sns.kdeplot(x='x', y='y', data=df, fill=True, thresh=0, levels=100, cmap="viridis")
-plt.colorbar(label='Density')
-plt.title('Density Plot of Points')
-plt.xlabel('X Coordinate')
-plt.ylabel('Y Coordinate')
-plt.show()
+    def read_and_concatenate_data(self):
+        # Read all CSV files from the specified folder and concatenate them into a single DataFrame
+        all_files = [os.path.join(self.folder_path, f) for f in os.listdir(self.folder_path) if f.endswith('.csv')]
+        self.df = pd.concat([pd.read_csv(file, sep=";") for file in all_files], ignore_index=True)
+
+    def clean_data(self):
+        # Drop unnecessary columns and handle data types
+        self.df.drop(columns=['Riskmetricname'], inplace=True)
+        # Convert columns to datetime where appropriate
+        self.df['pricingdate'] = pd.to_datetime(self.df['pricingdate'], errors='coerce')
+
+        # Fill missing values
+        fill_columns = ['quantity', 'spot', 'Quantity Incremental Change', 'Deal Id', 'Portfolio']
+        for col in fill_columns:
+            self.df[col].fillna(0, inplace=True)
+
+    def create_unique_id(self):
+        # Create a unique ID based on multiple columns
+        self.df['UniqueID'] = self.df['Underlying Type'] + '_' + self.df['Product Type'] + '_' + self.df['DealID'].astype(str)
+
+    def save_data(self, output_file):
+        # Save the cleaned DataFrame to a new CSV file
+        self.df.to_csv(output_file, index=False, compression='gzip')
+
+    def process_data(self):
+        self.read_and_concatenate_data()
+        self.clean_data()
+        self.create_unique_id()
+        self.save_data('dataset_no_duplicate.csv')
+
+if __name__ == '__main__':
+    folder_path = 'C:/path_to_your_data/'
+    processor = DataProcessor(folder_path)
+    processor.process_data()
