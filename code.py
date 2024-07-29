@@ -1,66 +1,65 @@
-import os
 import pandas as pd
-from tqdm import tqdm
-import warnings
 
-class DataProcessor:
-    def __init__(self, folder_path):
-        self.folder_path = folder_path
+class PnLIncidentScope:
+    """
+    This class contains the perimeters and dates affected by an incident on the PnL.
+    """
 
-    def read_and_concatenate_data(self):
-        all_files = [os.path.join(self.folder_path, f) for f in os.listdir(self.folder_path) if f.endswith('.csv')]
-        df_list = [pd.read_csv(file, sep=";", low_memory=False) for file in all_files]
-        self.df = pd.concat(df_list, ignore_index=True)
+    def __init__(self, it_incident_folder_path, booking_incident_folder_path, referential_incident_folder_path):
+        self.full_scope_it_incident = pd.read_csv(it_incident_folder_path)
+        self.full_scope_booking_incident = pd.read_csv(booking_incident_folder_path)
+        self.full_scope_referential_incident = pd.read_csv(referential_incident_folder_path)
 
-    def clean_data(self):
-        self.df.drop(columns=['Riskmetricname'], inplace=True)
-        self.df['pricingdate'] = pd.to_datetime(self.df['pricingdate'], errors='coerce')
-        # Use a more explicit fillna to avoid chain indexing issues
-        for col in self.df.columns:
-            self.df[col] = self.df[col].fillna(0)
+    def select_pnl(self):
+        # Select rows describing a PnL incident
+        self.pnl_scope_it_incident = self.full_scope_it_incident[self.full_scope_it_incident['Metrics'].str.contains('Eco PnL', case=False, na=False)].copy()
+        self.pnl_scope_booking_incident = self.full_scope_booking_incident[self.full_scope_booking_incident['ScopeOfData'].str.contains('Eco PnL', case=False, na=False)].copy()
+        self.pnl_scope_referential_incident = self.full_scope_referential_incident[self.full_scope_referential_incident['ScopeOfData'].str.contains('Eco PnL', case=False, na=False)].copy()
 
-    def create_unique_id(self):
-        self.df['UniqueID'] = self.df['Underlying Type'] + '_' + self.df['Product Type'] + '_' + self.df['DealID'].astype(str)
+    def correct_dates(self):
+        # Convert date columns to datetime
+        self.pnl_scope_it_incident['ValueDate'] = pd.to_datetime(self.pnl_scope_it_incident['ValueDate'])
+        self.pnl_scope_booking_incident['MGASOfDate'] = pd.to_datetime(self.pnl_scope_booking_incident['MGASOfDate'])
+        self.pnl_scope_referential_incident['MGASOfDate'] = pd.to_datetime(self.pnl_scope_referential_incident['MGASOfDate'])
 
-    def aggregate_data(self):
-        agg_dict = {
-            'quantity': 'sum', 'spot': 'sum', 'Quantity Incremental Change': 'sum',
-            'Strike': 'sum', 'New and Modified': 'sum', 'CMPO_EFFECT': 'sum',
-            'PRICINGMODEL_EFFECT': 'sum', 'FOREX_EFFECT': 'sum', 'IR_EFFECT': 'sum',
-            'SPOTDIV_EFFECT': 'sum', 'SPOTFOREX_EFFECT': 'sum', 'SPOTREPO_EFFECT': 'sum',
-            'THETA_EFFECT': 'sum', 'V3': 'sum', 'ZORG_EFFECT': 'sum',
-            'Underlying Name': 'first', 'Underlying Type': 'first', 'Product Type': 'first',
-            'Global Maturity': 'first', 'Effective Maturity': 'first', 'DealID': 'first',
-            'Portfolio': 'first', 'GOP': 'first', 'GRPC': 'first'
-        }
-        self.df = self.df.groupby('UniqueID').agg(agg_dict).reset_index()
+        # Adjust dates due to a general bug: the booking data are offset by one day
+        self.pnl_scope_booking_incident['MGASOfDate'] = self.pnl_scope_booking_incident['MGASOfDate'] - pd.DateOffset(days=1)
 
-    def save_data(self, output_file):
-        chunk_size = 10000  # Number of rows per chunk
-        num_chunks = len(self.df) // chunk_size + 1
-        mode = 'w'
-        header = True
+    def concatenate(self):
+        # Standardize column names
+        self.pnl_scope_it_incident.rename(columns={'ValueDate': 'Incident_date', 'GRPCP2C': 'grpcp200', 'GOP': 'gop'}, inplace=True)
+        self.pnl_scope_booking_incident.rename(columns={'MGASOfDate': 'Incident_date', 'GRPCP2C': 'grpcp200', 'GOP': 'gop'}, inplace=True)
+        self.pnl_scope_referential_incident.rename(columns={'MGASOfDate': 'Incident_date', 'GRPCP2C': 'grpcp200', 'GOP': 'gop'}, inplace=True)
 
-        with tqdm(total=len(self.df), desc="Saving DataFrame to CSV") as pbar:
-            for i in range(num_chunks):
-                start_row = i * chunk_size
-                end_row = (i + 1) * chunk_size
-                chunk = self.df.iloc[start_row:end_row]
-                chunk.to_csv(output_file, mode=mode, header=header, index=False, compression='gzip')
-                mode = 'a'  # Append mode for subsequent chunks
-                header = False  # Do not write the header for subsequent chunks
-                pbar.update(len(chunk))
+        # Add a 'Type' column to identify the source of the incident
+        self.pnl_scope_it_incident['Type'] = 'IT'
+        self.pnl_scope_booking_incident['Type'] = 'BOOKING'
+        self.pnl_scope_referential_incident['Type'] = 'REFERENTIAL'
 
-    def process_data(self):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=pd.errors.DtypeWarning)
-            self.read_and_concatenate_data()
-        self.clean_data()
-        self.create_unique_id()
-        self.aggregate_data()
-        self.save_data('dataset_no_duplicate.csv')
+        # Concatenate all scopes into a single DataFrame
+        self.pnl_scope_incident = pd.concat([self.pnl_scope_it_incident, self.pnl_scope_booking_incident, self.pnl_scope_referential_incident], ignore_index=True)
+
+    def select(self):
+        # Select relevant columns
+        columns_to_select = ['Incident_date', 'grpcp200', 'gop', 'Portfolio', 'Type']
+        self.pnl_scope_incident = self.pnl_scope_incident[columns_to_select].copy()
+
+        # Filter rows based on specific conditions
+        self.pnl_scope_incident = self.pnl_scope_incident[self.pnl_scope_incident['grpcp200'].str.contains('EQUITY', case=False, na=False)].copy()
+        self.pnl_scope_incident = self.pnl_scope_incident[self.pnl_scope_incident['gop'].str.contains('XF', case=False, na=False)].copy()
+
+    def process(self):
+        self.select_pnl()
+        self.correct_dates()
+        self.concatenate()
+        self.select()
+        return self.pnl_scope_incident
 
 if __name__ == '__main__':
-    folder_path = 'C:/path_to_your_data/'
-    processor = DataProcessor(folder_path)
-    processor.process_data()
+    it_incident_path = 'path_to_it_incident_file.csv'
+    booking_incident_path = 'path_to_booking_incident_file.csv'
+    referential_incident_path = 'path_to_referential_incident_file.csv'
+
+    scope = PnLIncidentScope(it_incident_path, booking_incident_path, referential_incident_path)
+    result = scope.process()
+    print(result.head())
