@@ -1,13 +1,35 @@
-**Introduction**
+**Processus de Certification des Métriques et du PnL**
 
-Mon stage chez Société Générale a été une plongée profonde dans les intrications du monde financier, où la précision des données s'avère cruciale pour prendre des décisions stratégiques éclairées. Ce rapport de stage se propose de décrire comment, à travers ce projet, j'ai abordé des défis complexes liés à la qualité des données, en appliquant des techniques avancées de détection d'anomalies et de traitement de séries temporelles, dans le but ultime d'optimiser les processus décisionnels et opérationnels de la banque.
+Le processus de certification des métriques de risque et du PnL est une étape cruciale dans la gestion des risques au sein de la Société Générale. Ce processus garantit que les données financières utilisées pour les analyses et les décisions de trading sont fiables, précises et exemptes d'anomalies. Une fois les données certifiées, elles peuvent être utilisées en toute confiance pour évaluer l'exposition au risque et prendre des décisions stratégiques éclairées.
 
-Le sujet de mon stage est d'une importance capitale car il touche directement à la stabilité financière de l'institution. Les données inexactes ou corrompues peuvent entraîner des conséquences désastreuses, allant de pertes financières substantielles à des erreurs stratégiques coûteuses. Mon rôle a consisté à développer et mettre en œuvre des solutions technologiques avancées pour améliorer la fiabilité des opérations financières, en garantissant que les données sur lesquelles la banque s'appuie sont à la fois précises et intègres.
+### Étapes du Processus de Certification
 
-Au cours de ce stage, j'ai acquis une compréhension approfondie non seulement des outils et méthodes de la data science mais aussi des dynamiques du marché financier. J'ai développé des compétences significatives en programmation et en analyse de données, essentielles pour adresser les problématiques de qualité de données dans un contexte aussi exigeant que celui de la Société Générale.
+1. **Alerte Checkpoint :**
+   - **Détection des Anomalies** : Les métriques de risque sont surveillées en continu, et des alertes sont générées lorsqu'une métrique approche ou dépasse les limites préétablies. Ces alertes signalent des anomalies potentielles dans les données ou dans les calculs de risque.
+   - **Investigation Préliminaire** : Les analystes reçoivent ces alertes et mènent une première analyse pour identifier la cause de l'anomalie. Cela peut inclure la vérification des calculs, la comparaison avec des données historiques, ou l'analyse des conditions de marché actuelles.
 
-Ce rapport débutera par une présentation de la Société Générale, abordant son histoire, sa structure, et son rôle dans le paysage financier global. Cette introduction générale à la banque permettra de situer le contexte dans lequel mon stage s'est déroulé, et de souligner l'importance de l'innovation et de la technologie dans la stratégie de l'entreprise.
+2. **Certification des Métriques et du PnL :**
+   - **Validation des Données** : Les analystes valident les données en vérifiant leur cohérence et leur exactitude. Cela inclut la certification des métriques de risque comme l'Equity Delta, ainsi que du PnL (Profit and Loss) qui évalue la valeur des positions détenues.
+   - **Détection des Incidents de DQ** : Durant la certification, les analystes doivent identifier tout problème de qualité des données (DQ) qui pourrait affecter l'intégrité des calculs. Les incidents de DQ peuvent être classés en trois catégories principales :
+     - **Incident de Booking** : Erreurs dans l'enregistrement des transactions, par exemple, des informations incorrectes sur le montant, la contrepartie, ou le type de transaction.
+     - **Incident IT** : Problèmes liés à l'infrastructure informatique, tels que des défaillances dans les systèmes de calcul, des erreurs dans les algorithmes, ou des interruptions de service qui affectent la disponibilité ou la précision des données.
+     - **Incident Référentiel** : Problèmes avec les données de référence, tels que des erreurs dans les paramètres de marché utilisés pour le pricing, des incohérences dans les taux d'intérêt, ou des données de marché obsolètes.
 
-Nous explorerons ensuite les spécificités de mon projet de stage, les méthodologies employées pour répondre aux défis identifiés, ainsi que les résultats obtenus. À travers ce document, je souhaite également refléter la manière dont ce stage a influencé mon développement professionnel, en me fournissant une plateforme solide pour débuter ma carrière dans la finance de marché avec une compréhension riche et nuancée des enjeux associés à la data science dans le secteur bancaire.
+3. **Ajustement des Valeurs :**
+   - **Correction des Anomalies** : Une fois un incident de DQ identifié, les valeurs affectées sont ajustées pour corriger les erreurs détectées. Ce processus est crucial pour s'assurer que les décisions basées sur ces données sont prises sur la base d'informations correctes et actuelles.
+   - **Boucle de Feedback** : Après ajustement, les métriques et le PnL sont à nouveau vérifiés pour s'assurer que les corrections ont été correctement appliquées. Ce cycle peut se répéter jusqu'à ce que toutes les anomalies soient résolues.
 
-En résumé, ce rapport offre une vue d'ensemble sur l'intégration des compétences techniques et théoriques dans des applications pratiques qui soutiennent des décisions financières stratégiques, tout en préparant le terrain pour les discussions futures sur les innovations dans la gestion des risques financiers.
+4. **Suivi via Colibris :**
+   - **Documenter et Justifier les Ajustements** : Toutes les actions prises pour corriger les anomalies et certifier les données sont documentées dans la plateforme Colibris. Les analystes y détaillent les causes des anomalies, les actions correctives entreprises, et les justifications pour ces actions.
+   - **Interaction avec les Traders** : Les résultats de la certification et les ajustements effectués sont partagés avec les traders via Colibris, permettant un retour d'information et une prise de décision rapide. Les traders peuvent être appelés à justifier certaines positions ou à fournir des informations supplémentaires pour faciliter le processus de certification.
+
+### Intérêt du Processus de Certification
+
+Le processus de certification des métriques et du PnL est essentiel pour maintenir l'intégrité des opérations financières de la banque. En identifiant et en corrigeant les incidents de qualité des données, la Société Générale peut :
+
+- **Minimiser les Risques Financiers** : En garantissant que les données utilisées pour les décisions de trading sont exactes, la banque réduit le risque de pertes financières dues à des erreurs de données.
+- **Améliorer la Précision des Rapports** : Les rapports financiers basés sur des données certifiées sont plus précis, ce qui améliore la transparence et la confiance dans les analyses de risque et les décisions stratégiques.
+- **Optimiser l'Efficacité des Analystes** : Le processus de certification permet aux analystes de se concentrer sur les anomalies les plus critiques, en automatisant certaines étapes de la détection des anomalies et en fournissant des outils pour documenter et justifier rapidement les ajustements nécessaires.
+- **Respecter les Réglementations** : La certification des données assure que la banque respecte les exigences réglementaires en matière de gestion des risques et de reporting financier, évitant ainsi les sanctions ou les pertes de réputation.
+
+En somme, ce processus permet de renforcer la robustesse des opérations de la banque, en garantissant que les décisions sont prises sur la base de données fiables et en renforçant la gestion des risques dans un environnement financier complexe.
