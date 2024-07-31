@@ -1,25 +1,13 @@
-import pandas as pd
+**Introduction**
 
-# Exemple de deux DataFrames
-df1 = pd.DataFrame({
-    'A': [1, 2, 3, 4],
-    'B': ['a', 'b', 'c', 'd']
-})
+Mon stage chez Société Générale a été une plongée profonde dans les intrications du monde financier, où la précision des données s'avère cruciale pour prendre des décisions stratégiques éclairées. Ce rapport de stage se propose de décrire comment, à travers ce projet, j'ai abordé des défis complexes liés à la qualité des données, en appliquant des techniques avancées de détection d'anomalies et de traitement de séries temporelles, dans le but ultime d'optimiser les processus décisionnels et opérationnels de la banque.
 
-df2 = pd.DataFrame({
-    'A': [3, 4, 5, 6],
-    'B': ['c', 'd', 'e', 'f']
-})
+Le sujet de mon stage est d'une importance capitale car il touche directement à la stabilité financière de l'institution. Les données inexactes ou corrompues peuvent entraîner des conséquences désastreuses, allant de pertes financières substantielles à des erreurs stratégiques coûteuses. Mon rôle a consisté à développer et mettre en œuvre des solutions technologiques avancées pour améliorer la fiabilité des opérations financières, en garantissant que les données sur lesquelles la banque s'appuie sont à la fois précises et intègres.
 
-# Fusionner les deux DataFrames avec un indicateur
-merged_df = df1.merge(df2, on=['A', 'B'], how='outer', indicator=True)
+Au cours de ce stage, j'ai acquis une compréhension approfondie non seulement des outils et méthodes de la data science mais aussi des dynamiques du marché financier. J'ai développé des compétences significatives en programmation et en analyse de données, essentielles pour adresser les problématiques de qualité de données dans un contexte aussi exigeant que celui de la Société Générale.
 
-# Séparer les lignes uniques à chaque DataFrame
-unique_to_df1 = merged_df[merged_df['_merge'] == 'left_only']
-unique_to_df2 = merged_df[merged_df['_merge'] == 'right_only']
+Ce rapport débutera par une présentation de la Société Générale, abordant son histoire, sa structure, et son rôle dans le paysage financier global. Cette introduction générale à la banque permettra de situer le contexte dans lequel mon stage s'est déroulé, et de souligner l'importance de l'innovation et de la technologie dans la stratégie de l'entreprise.
 
-print("Lignes uniques à df1:")
-print(unique_to_df1)
+Nous explorerons ensuite les spécificités de mon projet de stage, les méthodologies employées pour répondre aux défis identifiés, ainsi que les résultats obtenus. À travers ce document, je souhaite également refléter la manière dont ce stage a influencé mon développement professionnel, en me fournissant une plateforme solide pour débuter ma carrière dans la finance de marché avec une compréhension riche et nuancée des enjeux associés à la data science dans le secteur bancaire.
 
-print("\nLignes uniques à df2:")
-print(unique_to_df2)
+En résumé, ce rapport offre une vue d'ensemble sur l'intégration des compétences techniques et théoriques dans des applications pratiques qui soutiennent des décisions financières stratégiques, tout en préparant le terrain pour les discussions futures sur les innovations dans la gestion des risques financiers.
