@@ -4,30 +4,23 @@ from sklearn.ensemble import IsolationForest
 from skopt import BayesSearchCV
 from skopt.space import Integer, Real, Categorical
 from sklearn.model_selection import KFold
-from sklearn.metrics import accuracy_score
 
-class OptimizedIsolationForest(IsolationForest):
-    def __init__(self, n_estimators=100, max_samples='auto', contamination='auto', max_features=1.0, bootstrap=False, n_jobs=-1, random_state=None):
-        super().__init__(
-            n_estimators=n_estimators, 
-            max_samples=max_samples, 
-            contamination=contamination, 
-            max_features=max_features, 
-            bootstrap=bootstrap, 
-            n_jobs=n_jobs, 
-            random_state=random_state
-        )
-        self.test_scores = []
+class OptimizedIsolationForest:
+    def __init__(self, X_train, X_test, y_train, y_test, scorer):
+        self.X_train = X_train
+        self.X_test = X_test
+        self.y_train = y_train
+        self.y_test = y_test
+        self.scorer = scorer
+        self.best_params = None
+        self.best_score = None
+        self.test_score = None
 
-    def fit_optimizer(self, X_train, X_test, y_test, n_iter=50, cv_splits=3):
-        # Initialize the plot for dynamic updating
-        plt.ion()
-        fig, ax = plt.subplots()
-        ax.set_xlabel('Iteration')
-        ax.set_ylabel('Test Accuracy')
-        ax.set_title('Performance on Test Set')
+    def fit_optimizer(self, isolation_forest, n_iter=40, cv_splits=3, random_state=42, show_plot=False):
+        # Initialize cross-validation
+        kf = KFold(n_splits=cv_splits, shuffle=True, random_state=random_state)
 
-        # Define the search space for hyperparameters
+        # Define the search space
         search_space = {
             'n_estimators': Integer(100, 300),
             'max_samples': Integer(50, 200),
@@ -36,42 +29,71 @@ class OptimizedIsolationForest(IsolationForest):
             'bootstrap': Categorical([True, False])
         }
 
-        # Initialize Bayesian hyperparameter search
-        bayes_search = BayesSearchCV(
-            estimator=self,
+        # Initialize dynamic plot
+        if show_plot:
+            plt.ion()
+            fig, ax = plt.subplots()
+            ax.set_xlabel('Iteration')
+            ax.set_ylabel('Best Score')
+            ax.set_title('Dynamic Optimization Progress')
+            scores = []
+            uncertainties = []
+
+        # Bayesian Optimization
+        opt = BayesSearchCV(
+            estimator=isolation_forest,
             search_spaces=search_space,
             n_iter=n_iter,
-            cv=KFold(n_splits=cv_splits, shuffle=True, random_state=self.random_state),
-            scoring='accuracy',  # Confirm that 'accuracy' is a valid scoring for isolation forests
-            return_train_score=False,
-            random_state=self.random_state,
-            n_jobs=self.n_jobs,
+            cv=kf,
+            random_state=random_state,
+            n_jobs=-1,
             verbose=1
         )
 
-        # Fit the optimizer with the callback
-        bayes_search.fit(X_train, y_test, callback=lambda optim_result: self._update_plot(ax, fig, bayes_search))
+        def on_step(optim_result):
+            if show_plot:
+                best_score = opt.best_score_
+                scores.append(best_score)
+                uncertainties.append(optim_result.fun)
+                ax.clear()
+                ax.plot(scores, label="Best Score", color='blue')
+                ax.fill_between(range(len(scores)), np.array(scores) - np.array(uncertainties), np.array(scores) + np.array(uncertainties), color='blue', alpha=0.2)
+                ax.legend()
+                plt.pause(0.1)
+            return False
 
-        # Close the plot when done
-        plt.ioff()
-        plt.show()
+        # Fit the optimizer with callbacks
+        opt.fit(self.X_train, self.y_train, callback=[on_step])
 
-        # Update the model with the best found parameters
-        self.set_params(**bayes_search.best_params_)
-        # Optionally, refit the model with the best parameters on the full dataset
-        self.fit(X_train)
+        # Close the plot if it was used
+        if show_plot:
+            plt.ioff()
+            plt.show()
 
-        return bayes_search
+        # Best parameters and score
+        self.best_params = opt.best_params_
+        self.best_score = opt.best_score_
 
-    def _update_plot(self, ax, fig, search):
-        """Internal method to update the plot."""
-        best_score = search.best_score_
-        self.test_scores.append(best_score)
-        ax.plot(self.test_scores, color='blue')
-        fig.canvas.draw()
-        plt.pause(0.1)
+        # Predict on the test data
+        y_pred_test = opt.best_estimator_.predict(self.X_test)
 
-# Usage
-X_train, X_test, y_train, y_test = # Your data preparation logic here
-opt_iforest = OptimizedIsolationForest(random_state=42)
-opt_search = opt_iforest.fit_optimizer(X_train, X_test, y_test)
+        # Convert -1/1 predictions to 0/1
+        y_pred_test = np.where(y_pred_test == -1, 0, 1)
+
+        # Evaluate the model
+        self.test_score = self.scorer(self.y_test, y_pred_test)
+
+if __name__ == "__main__":
+    # Replace with your actual data loading logic
+    # Example:
+    # X_train, X_test, y_train, y_test = load_data()
+    
+    isolation_forest = IsolationForest(random_state=42)
+    scorer = accuracy_score  # Replace with your custom scoring function
+    
+    model = OptimizedIsolationForest(X_train, X_test, y_train, y_test, scorer)
+    model.fit_optimizer(isolation_forest, show_plot=True)
+    
+    print("Best Params:", model.best_params)
+    print("Best Score:", model.best_score)
+    print("Test Score:", model.test_score)
