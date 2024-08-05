@@ -1,0 +1,14 @@
+Iteration No: 1, Time taken: 0.0000, Function value obtained: 0.3143, Current minimum: 0.3143
+Iteration No: 2, Time taken: 3.1446, Function value obtained: 0.3333, Current minimum: 0.3143
+Iteration No: 3, Time taken: 2.2099, Function value obtained: 0.3333, Current minimum: 0.3143
+Iteration No: 4, Time taken: 0.9378, Function value obtained: 0.3048, Current minimum: 0.3048
+Iteration No: 5, Time taken: 1.4062, Function value obtained: 0.3048, Current minimum: 0.3048
+Iteration No: 6, Time taken: 1.1933, Function value obtained: 0.3429, Current minimum: 0.3048
+Iteration No: 7, Time taken: 1.0945, Function value obtained: 0.3333, Current minimum: 0.3048
+Iteration No: 8, Time taken: 0.8441, Function value obtained: 0.3333, Current minimum: 0.3048
+Iteration No: 9, Time taken: 0.8823, Function value obtained: 0.3333, Current minimum: 0.3048
+Iteration No: 10, Time taken: 1.7592, Function value obtained: 0.3333, Current minimum: 0.3048
+Iteration No: 11, Time taken: 2.0766, Function value obtained: 0.3048, Current minimum: 0.3048
+Iteration No: 12, Time taken: 2.1191, Function value obtained: 0.3143, Current minimum: 0.3048
+Iteration No: 13, Time taken: 2.4385, Function value obtained: 0.3048, Current minimum: 0.3048
+Iteration No: 14, Time taken: 2.0413, Function value obtained: 0.3048, Current minimum: 0.3048
