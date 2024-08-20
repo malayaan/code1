@@ -1,43 +1,25 @@
-import pandas as pd
-from sklearn.ensemble import IsolationForest
-from sklearn.model_selection import train_test_split
-import step_4_anomaly_detector
-import numpy as np
+**Processus de Certification des Métriques de Risques par les Analystes**
 
-# Assuming step_4_anomaly_detector contains the AnomalyDetector class and custom_scorer
+Dans le monde complexe des opérations de marché, les métriques de risque jouent un rôle crucial dans la surveillance et la gestion des positions financières. À la Société Générale, comme dans la plupart des grandes institutions financières, le processus de certification des métriques de risque est une procédure essentielle qui assure l'exactitude des données utilisées pour évaluer le risque associé à chaque position de trading.
 
-global_path = "C:\\Users\\YourUsername\\OneDrive - GROUP DIGITAL WORKPLACE\\Documents\\YourProjectFolder\\"
-X_set_train = pd.read_csv(global_path + 'dataframes_local/X_set_train.csv')
-y_train = pd.read_csv(global_path + 'dataframes_local/y_train.csv')
-X_set_test = pd.read_csv(global_path + 'dataframes_local/X_set_test.csv')
-y_test = pd.read_csv(global_path + 'dataframes_local/y_test.csv')
+### Diversité des Métriques de Risque
 
-# Assuming 'ProductTypeGroup' is a column in your datasets
-groups = X_set_train['ProductTypeGroup'].unique()
+Il existe des centaines de métriques de risque, chacune conçue pour évaluer un aspect spécifique du risque de marché, de crédit, de liquidité ou opérationnel. Ces métriques varient considérablement en fonction des instruments financiers, des marchés et des stratégies de trading impliqués. Par exemple, l'Equity Delta mesure la sensibilité du prix d'une option à un changement dans le prix de l'actif sous-jacent, tandis que le VaR (Value at Risk) cherche à prédire la perte potentielle maximale dans des conditions de marché normales sur une période spécifique.
 
-results = {}  # To store results from each group
+### Signification d'un Périmètre
 
-for group in groups:
-    # Filter the datasets for the current group
-    X_train_group = X_set_train[X_set_train['ProductTypeGroup'] == group].drop(columns=['unique_id', 'Portfolio', 'Underlying Type', 'pricingdate', 'ProductTypeGroup'])
-    X_test_group = X_set_test[X_set_test['ProductTypeGroup'] == group].drop(columns=['unique_id', 'Portfolio', 'Underlying Type', 'pricingdate', 'ProductTypeGroup'])
-    y_train_group = y_train[X_set_train['ProductTypeGroup'] == group]
-    y_test_group = y_test[X_set_test['ProductTypeGroup'] == group]
+Un périmètre, dans le contexte d'une banque d'investissement, fait référence à un trading desk spécifique, comprenant ses produits, ses stratégies habituelles, ses autorisations réglementaires et ses habitudes de trading. Chaque périmètre est unique et nécessite une compréhension approfondie de ses spécificités pour une gestion efficace des risques. Les analystes, spécialisés par périmètre, sont chargés de certifier les métriques de risque pertinentes pour leur domaine spécifique, garantissant ainsi que les calculs de risque sont précis et reflètent correctement la situation actuelle du marché.
 
-    # Initialize the anomaly detector for the current group
-    detector = step_4_anomaly_detector.AnomalyDetector(
-        estimator=IsolationForest(random_state=42),
-        X_train=X_train_group,
-        X_test=X_test_group,
-        y_train=y_train_group.ravel(),
-        y_test=y_test_group.ravel(),
-        scorer=step_4_anomaly_detector.custom_scorer,
-        patience=10
-    )
-    
-    # Start the detector and collect results
-    result = detector.start()  # Modify the start method to return results if needed
-    results[group] = result  # Store results by group
+### Défis dans la Certification des Métriques
 
-# Optionally, you can print or analyze the results collected
-print("Detection results by ProductTypeGroup:", results)
+Le processus de certification des métriques de risque ne peut pas adopter une approche universelle en raison de la diversité des périmètres et des métriques impliquées. Certaines métriques peuvent ne pas être applicables à tous les périmètres en raison de la nature des instruments tradés ou des stratégies employées. Par exemple, une métrique spécifique au risque de crédit pourrait ne pas être pertinente pour un desk qui négocie principalement des instruments de marché.
+
+En outre, les analystes doivent gérer les complications suivantes :
+
+1. **Diversité des Métriques** : Avec des centaines de métriques en jeu, comprendre et appliquer correctement chaque métrique dans son contexte approprié est un défi majeur.
+2. **Spécificité des Périmètres** : Chaque périmètre ayant ses propres règles et stratégies, les analystes doivent être extrêmement familiarisés avec les nuances de leur secteur spécifique pour effectuer une certification précise.
+3. **Coordination entre Analystes** : Les analystes spécialisés par métrique ou par périmètre doivent souvent collaborer pour garantir une vue intégrée et cohérente du risque.
+
+### Conclusion sur la Certification des Métriques
+
+La certification des métriques de risque est donc un processus complexe et hautement spécialisé qui requiert une expertise approfondie et une analyse minutieuse. Les analystes jouent un rôle crucial en s'assurant que toutes les métriques sont correctement évaluées et que les données sur lesquelles se basent les décisions de trading sont robustes et fiables. Ce processus ne seulement aide à prévenir les pertes financières significatives mais contribue également à maintenir la confiance des clients et des régulateurs dans la stabilité et l'intégrité des opérations de la banque.
