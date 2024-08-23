@@ -1,5 +1,17 @@
-Au début de mon stage, je travaillais sous l'hypothèse que les données historiques de PnL et leurs effets disponibles provenaient directement du pricer, sans modifications ultérieures. Cette perception était due à ma méconnaissance du processus interne où, en réalité, le PnL et ses effets subissent de nombreux ajustements automatiques avant d'être présentés à l'analyste pour validation. Ces ajustements visent à corriger les incohérences, affiner les calculs et s'assurer que les données reflètent au mieux la réalité du marché.
+Dans le cadre de l'analyse des données de risques, trois dates spécifiques sont souvent considérées : **la date de maturité effective**, **la date de maturité globale**, et **la date de pricing**. 
 
-Ce n'est que tardivement que j'ai pris conscience de l'existence de ces corrections automatiques et, même après, j'ai longtemps cru que les seules données disponibles pour analyse étaient celles issues directement du pricer. Cette compréhension limitée a conditionné une grande partie de mon travail, car j'ai dû me contenter de ces données tout au long de mon stage, avec les limitations qu'elles comportaient.
+1. **Effective Maturity** (maturité effective) : C'est la date à laquelle un instrument financier, tel qu'une obligation ou un contrat dérivé, arrive à expiration, et le principal est remboursé. Cette date reflète l'échéance réelle de l'instrument après avoir pris en compte toutes les conditions spécifiques, telles que les options d'appel ou de remboursement anticipé.
 
-Récemment, j'ai découvert un accès à des données plus récentes et plus détaillées, intégrant les ajustements mentionnés. Cependant, la complexité d'accès à ces données et les difficultés à établir des contacts efficaces avec les experts au sein d'une grande organisation comme la Société Générale ont considérablement freiné l'avancement de mon projet. Ce retard a impacté la qualité des données avec lesquelles j'ai travaillé, illustrant bien l'adage "garbage in, garbage out" : des données imparfaites entraînent inévitablement des résultats moins pertinents, compromettant ainsi l'efficacité de l'analyse et des modèles développés.
+2. **Global Maturity** (maturité globale) : Cette date représente l'échéance prévue initialement pour l'instrument, sans tenir compte des ajustements ou des modifications pouvant survenir pendant la durée de vie de l'instrument. Elle est souvent utilisée comme une référence pour les conditions générales du contrat.
+
+3. **Pricing Date** (date de pricing) : C'est la date à laquelle le prix de l'instrument est fixé ou évalué. Cette date est essentielle pour la valorisation du PnL (Profit and Loss) et des effets associés.
+
+**Transformation en colonnes booléennes :**
+En convertissant ces dates en deux colonnes booléennes :
+- **pricingdate_global_maturity** : Indique si la date de pricing correspond à la date de maturité globale.
+- **pricingdate_effective_maturity** : Indique si la date de pricing correspond à la date de maturité effective.
+
+**Intérêt de cette transformation :**
+Cette transformation permet de détecter facilement des incohérences ou des anomalies dans les données, qui pourraient signaler des problèmes de qualité des données (DQ). Par exemple, si une date de pricing correspond à la maturité effective mais pas à la maturité globale, cela pourrait indiquer un ajustement récent qui n'a pas été correctement pris en compte dans toutes les parties du système. De telles anomalies pourraient fausser les calculs de PnL ou d'autres métriques de risque, ce qui rend cette vérification cruciale.
+
+Cette approche s'appuie sur l'expérience partagée par les analystes, qui ont souligné l'importance de surveiller les incohérences temporelles pour identifier les erreurs potentielles dans les données de marché et les processus de valorisation. En automatisant cette vérification, on améliore la capacité à détecter ces problèmes rapidement et à les corriger avant qu'ils n'affectent les analyses financières.
