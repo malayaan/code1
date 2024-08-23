@@ -1,15 +1,5 @@
-Dans le cadre de mon analyse statistique des rapports d'incidents au sein de la banque, il est crucial de comprendre la structure organisationnelle des unités opérationnelles concernées :
+L'analyse statistique approfondie des rapports d'incidents a également souligné l'intérêt particulier de se concentrer sur le Profit and Loss (PnL) dans un premier temps. Cette décision s'appuie sur la constatation que tous les incidents déclarés concernent cet indicateur, une culture de déclaration bien établie qui contraste avec celle des autres métriques de risque, moins systématiquement rapportées.
 
-1. **Trading Desk (GRPP200)** : Un trading desk est une unité spécifique au sein de la banque où les traders réalisent des opérations financières sur différents types de produits. C'est le niveau le plus élevé de spécificité dans la gestion des opérations de trading.
+Choisir de travailler avec le PnL a été stratégique, visant à exploiter des données de la plus haute qualité possible. Statistiquement, cette approche est justifiée car elle correspond à une grande partie des incidents déclarés. Ce focus permet non seulement de cibler là où l'impact de l'amélioration de la qualité des données serait le plus significatif, mais également de maximiser l'efficacité des interventions en concentrant les efforts sur les aspects les plus critiques et documentés des opérations financières.
 
-2. **Profit Center (PC)** : Ce terme désigne un centre de profit qui est responsable de la gestion des revenus et des coûts associés à une partie spécifique des opérations de trading. Un PC peut comprendre plusieurs groupes de portefeuilles.
-
-3. **Groupe de Portefeuilles (GOP)** : Un GOP regroupe plusieurs portefeuilles qui sont gérés ensemble en raison de leurs stratégies ou de leurs objectifs d'investissement similaires. C'est souvent à ce niveau que les incidents sont déclarés.
-
-4. **Portefeuille** : Il s'agit d'un ensemble de deals ou transactions financières gérées comme une unité unique par un gestionnaire de portefeuille.
-
-Au cours de mon stage, l'analyse a révélé que la plupart des incidents de data quality (DQ) sont déclarés au niveau des GOP, tandis que les déclarations au niveau des portefeuilles sont moins fréquentes. En discutant avec les analystes, j'ai progressivement compris que la classification des incidents en DQ repose souvent sur des critères appliqués au niveau des deals, même si la complexité générale de ces classifications rend le processus difficile à saisir pleinement.
-
-Étant donné les contraintes de mon stage, principalement positionné dans l'équipe IT et non directement avec les analystes, il n'était pas possible d'acquérir une compréhension approfondie du métier d'analyste sans une organisation préalable. Ce manque de compréhension détaillée des processus métier a représenté un obstacle tout au long de mon stage.
-
-Parmi les différents trading desks analysés, EQDEUR1D s'est distingué par le volume le plus élevé d'incidents, particulièrement au sein du GOP XF. Les produits gérés dans ce périmètre sont relativement simples, principalement des equities, où le travail des analystes est censé être plus direct. Heureusement, j'ai pu établir un contact direct avec un analyste de ce périmètre, qui a fourni des éclaircissements utiles tout au long de mon stage, facilitant ainsi ma compréhension des enjeux et des processus impliqués.
+Cette démarche s'inscrit dans une logique d'optimisation des ressources et d'efficacité opérationnelle, assurant que les efforts déployés pour améliorer la gestion des données sont à la fois pertinents et impactants, soutenant ainsi directement les objectifs stratégiques de la banque en matière de gestion des risques.
