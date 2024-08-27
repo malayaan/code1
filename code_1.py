@@ -1,8 +1,1 @@
-### Objectif du Stage et Problématique
-
-L'objectif principal de ce stage est de développer un Proof of Concept (PoC) visant à améliorer la détection des incidents de qualité des données (Data Quality, DQ) dans le processus de certification des métriques de risques et du Profit and Loss (PnL). Le processus de certification est crucial pour garantir que les valeurs de PnL et les autres indicateurs de risques reflètent précisément la réalité du marché et des positions prises par les traders. Ce projet s'inscrit dans une perspective de recherche appliquée, où il s'agit de proposer des méthodes innovantes basées sur les dernières avancées en science des données pour répondre à des enjeux financiers concrets.
-
-**Problématique du Stage :** 
-Le défi réside dans l'identification et la correction des anomalies dans les données de PnL et des métriques de risques, dans un contexte où ces anomalies peuvent avoir des impacts significatifs sur la gestion des risques financiers. Compte tenu de la complexité des données, qui sont influencées par une multitude de facteurs et d'ajustements, le projet vise à concevoir des modèles prédictifs capables de détecter les incidents de DQ avant qu'ils ne soient certifiés par les analystes. Cela nécessite une exploration approfondie des techniques de machine learning, incluant le traitement de séries temporelles et l'analyse de graphes, afin de proposer des solutions robustes et adaptées aux spécificités du métier.
-
-Ce stage s'inscrit dans une dynamique de recherche, où l'objectif est non seulement de proposer une solution technique mais aussi de contribuer à l'amélioration des pratiques actuelles en matière de certification des données financières.
+Dans cette section sur le Feature Engineering, nous allons détailler comment les caractéristiques clés d'une position financière prise par un deal sont extraites et transformées pour créer des variables exploitables par les modèles prédictifs
