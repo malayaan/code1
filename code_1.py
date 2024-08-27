@@ -1,40 +1,45 @@
 import pandas as pd
-from sklearn.cluster import KMeans
 import numpy as np
+from sklearn.cluster import KMeans
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-# Exemple de DataFrame
+# Création d'un DataFrame d'exemple
+np.random.seed(42)
 data = {
-    'nom_embedding': ['emb1', 'emb2', 'emb3', 'emb4', 'emb5', 'emb6', 'emb7', 'emb8', 'emb9', 'emb10'],
-    'embedding_1': np.random.rand(10),
-    'embedding_2': np.random.rand(10),
-    'embedding_3': np.random.rand(10)
+    'Embedding1': np.random.rand(100),
+    'Embedding2': np.random.rand(100),
+    'Embedding3': np.random.rand(100),
+    'Name': ['Name' + str(i) for i in range(100)]
 }
 df = pd.DataFrame(data)
 
-# Utilisation uniquement des deux premières colonnes d'embedding
-X = df[['embedding_1', 'embedding_2']]
+# Sélection des deux premières colonnes d'embedding pour le clustering
+X = df[['Embedding1', 'Embedding2']]
 
-# Création du modèle KMeans
+# Clustering avec KMeans
 kmeans = KMeans(n_clusters=5, random_state=42)
-df['cluster'] = kmeans.fit_predict(X)
+df['Cluster'] = kmeans.fit_predict(X)
 
-# Calculer les centres des clusters
-centers = kmeans.cluster_centers_
+# Trouver les points les plus proches du centre de chaque cluster
+centroids = kmeans.cluster_centers_
+closest_data = []
+for i in range(5):
+    cluster_data = df[df['Cluster'] == i][['Embedding1', 'Embedding2']]
+    distances = np.sqrt(((cluster_data - centroids[i])**2).sum(axis=1))
+    closest_data.append(cluster_data.iloc[distances.nsmallest(10).index])
 
-# Trouver les 10 points les plus proches des centres de chaque cluster
-def find_closest_points(df, centers, num_points=10):
-    closest_points = {}
-    for i, center in enumerate(centers):
-        df['distance_to_center_{}'.format(i)] = np.sqrt(
-            (df['embedding_1'] - center[0]) ** 2 + (df['embedding_2'] - center[1]) ** 2
-        )
-        closest_points[i] = df[df['cluster'] == i].nsmallest(num_points, 'distance_to_center_{}'.format(i))
-    return closest_points
+# Visualisation avec une carte de densité
+plt.figure(figsize=(10, 6))
+sns.kdeplot(data=df, x='Embedding1', y='Embedding2', hue='Cluster', fill=True, palette="muted")
+plt.scatter(centroids[:, 0], centroids[:, 1], s=300, c='black', marker='x')  # Marquer les centres
+plt.title('Carte de densité des clusters avec centres marqués')
+plt.xlabel('Embedding1')
+plt.ylabel('Embedding2')
+plt.show()
 
-# Appel de la fonction et récupération des points les plus proches
-closest_points = find_closest_points(df, centers)
-
-# Afficher les résultats
-for cluster, points in closest_points.items():
-    print(f"Cluster {cluster}:")
-    print(points[['nom_embedding', 'embedding_1', 'embedding_2']])
+# Afficher les exemples les plus centraux de chaque cluster
+for i, points in enumerate(closest_data):
+    print(f"Exemples centraux pour le Cluster {i}:")
+    print(points)
+    print("\n")
