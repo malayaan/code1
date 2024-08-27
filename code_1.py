@@ -1,17 +1,23 @@
-Dans le cadre de l'analyse des données de risques, trois dates spécifiques sont souvent considérées : **la date de maturité effective**, **la date de maturité globale**, et **la date de pricing**. 
+### Feature Engineering pour les Colonnes Textuelles
 
-1. **Effective Maturity** (maturité effective) : C'est la date à laquelle un instrument financier, tel qu'une obligation ou un contrat dérivé, arrive à expiration, et le principal est remboursé. Cette date reflète l'échéance réelle de l'instrument après avoir pris en compte toutes les conditions spécifiques, telles que les options d'appel ou de remboursement anticipé.
+Dans le cadre de mon projet, le **Feature Engineering** des colonnes textuelles a été un aspect essentiel pour améliorer la qualité et la pertinence des données en vue de la détection des anomalies de qualité des données (DQ). Ce processus a impliqué plusieurs étapes clés pour transformer des informations textuelles en données vectorielles exploitables par des algorithmes de machine learning.
 
-2. **Global Maturity** (maturité globale) : Cette date représente l'échéance prévue initialement pour l'instrument, sans tenir compte des ajustements ou des modifications pouvant survenir pendant la durée de vie de l'instrument. Elle est souvent utilisée comme une référence pour les conditions générales du contrat.
+#### **1. Regroupement des Product Types :**
+Les *Product Types* décrivent les différentes natures des instruments financiers présents dans les données. Cela inclut une variété de produits tels que les **Shares**, **Options Leg**, **Index Forward**, **Dividend Leg**, **Stock Future**, **Basket Forward**, et **Trackers**. Ces catégories de produits se comportent différemment en termes de risque, mais certains partagent des caractéristiques communes qui justifient un regroupement.
 
-3. **Pricing Date** (date de pricing) : C'est la date à laquelle le prix de l'instrument est fixé ou évalué. Cette date est essentielle pour la valorisation du PnL (Profit and Loss) et des effets associés.
+Sur la base des témoignages des analystes, j'ai créé un **mapping** pour regrouper les types de produits en **Product Type Groups**. L'objectif était de simplifier l'analyse en regroupant les produits susceptibles de présenter des comportements similaires en termes de métriques de risque et de détection des incidents de DQ. Par exemple, les **Shares** et les **Stock Futures** peuvent être regroupés sous une même catégorie, car ils présentent des dynamiques similaires.
 
-**Transformation en colonnes booléennes :**
-En convertissant ces dates en deux colonnes booléennes :
-- **pricingdate_global_maturity** : Indique si la date de pricing correspond à la date de maturité globale.
-- **pricingdate_effective_maturity** : Indique si la date de pricing correspond à la date de maturité effective.
+#### **2. Vectorisation des Colonnes Textuelles :**
+Outre les *Product Types*, j'avais également des colonnes pour les noms de portefeuilles et les sous-jacents. Pour ces colonnes, ainsi que pour les *Product Type Groups* nouvellement créés, j'ai choisi une approche de vectorisation inspirée du traitement du langage naturel (NLP).
 
-**Intérêt de cette transformation :**
-Cette transformation permet de détecter facilement des incohérences ou des anomalies dans les données, qui pourraient signaler des problèmes de qualité des données (DQ). Par exemple, si une date de pricing correspond à la maturité effective mais pas à la maturité globale, cela pourrait indiquer un ajustement récent qui n'a pas été correctement pris en compte dans toutes les parties du système. De telles anomalies pourraient fausser les calculs de PnL ou d'autres métriques de risque, ce qui rend cette vérification cruciale.
+J'ai utilisé un modèle **Word2Vec** pour obtenir des *embeddings* des valeurs textuelles. L'idée était de traiter chaque ligne de mes données comme une phrase composée de trois éléments : le *Product Type Group*, le *nom du portefeuille*, et le *nom du sous-jacent*. Cette approche permet d'entraîner le modèle Word2Vec sur ces "phrases", générant ainsi des vecteurs d'embeddings qui capturent la proximité sémantique entre différents termes.
 
-Cette approche s'appuie sur l'expérience partagée par les analystes, qui ont souligné l'importance de surveiller les incohérences temporelles pour identifier les erreurs potentielles dans les données de marché et les processus de valorisation. En automatisant cette vérification, on améliore la capacité à détecter ces problèmes rapidement et à les corriger avant qu'ils n'affectent les analyses financières.
+#### **3. Optimisation des Embeddings par Analyse en Composantes Principales (PCA) :**
+Après avoir obtenu les embeddings via Word2Vec, j'ai utilisé une **Analyse en Composantes Principales (PCA)** pour déterminer la dimension optimale des vecteurs d'embeddings. L'objectif était de réduire la dimensionnalité tout en conservant le maximum d'inertie, c'est-à-dire l'essentiel de l'information contenue dans les données.
+
+En pratique, j'ai déterminé que trois dimensions suffisaient pour capturer les informations pertinentes pour les *underlying names*, les *portfolios*, et les *Product Type Groups*. Cette réduction dimensionnelle permet à mon algorithme de détection d'anomalies de mieux interpréter les relations entre les différents éléments, en exploitant des embeddings qui traduisent la similarité comportementale entre certains sous-jacents en termes d'incidents de DQ.
+
+#### **Références Techniques :**
+Pour approfondir l'implémentation de **Word2Vec**, je me suis référé à l'article fondateur de **Mikolov et al. (2013)**, qui présente le modèle et ses applications principales dans le domaine du NLP. Ce modèle est basé sur l'idée que les mots apparaissant dans des contextes similaires ont des significations proches, une approche qui a montré son efficacité pour capturer les relations sémantiques entre les mots. L'application de Word2Vec dans le cadre de mon projet a permis de traduire des concepts financiers en vecteurs numériques exploitables par des modèles prédictifs, une démarche alignée avec les meilleures pratiques en NLP et en machine learning.
+
+En résumé, ce travail de Feature Engineering sur les colonnes textuelles a permis de structurer les données de manière à améliorer la précision des modèles de détection d'anomalies, tout en assurant une représentation cohérente et pertinente des informations textuelles critiques.
