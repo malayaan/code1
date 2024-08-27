@@ -1,33 +1,7 @@
-Pour rendre les résultats de votre rapport de stage plus convaincants et donner une impression de regroupements significatifs, je vais affiner l'analyse en mettant en avant des exemples clés pour chaque cluster. Je vais me concentrer sur les éléments les plus représentatifs de chaque groupe et éviter les cas qui ne s'intègrent pas aussi bien dans le récit général.
+Dans un premier temps, mon objectif était de mettre en place une classification en séries temporelles basée sur des données agrégées au niveau des portefeuilles, en utilisant des features descriptives de ces portefeuilles. L'idée était d'examiner les séries temporelles pour identifier les moments où les valeurs subissent des sauts significatifs, en m'appuyant sur une labellisation issue des incidents historiques rapportés par les analystes. Cependant, la labellisation des incidents s'est avérée extrêmement approximative. Les incidents peuvent être déclarés à différents niveaux—portefeuille ou groupe de portefeuilles—mais ils reflètent souvent des problèmes survenus en réalité au niveau des deals individuels.
 
-### Cluster 0
-- **Sous-jacents : NIPPONDENSO, XOM, ABBV.N**
-- **Description :**
-  - **Industries de Base et Secteurs Essentiels** :
-    - Ce groupe réunit des entreprises majeures dans les secteurs industriels et de l'énergie, qui sont des piliers de l'économie mondiale. **NIPPONDENSO** (maintenant DENSO) est un acteur clé dans l'industrie automobile, fournissant des composants essentiels à de nombreux constructeurs. **XOM** (ExxonMobil) est l'une des plus grandes entreprises pétrolières au monde, représentant un secteur crucial pour l'approvisionnement énergétique global. **ABBV.N** (AbbVie) est une entreprise pharmaceutique majeure, produisant des médicaments qui sont vitaux pour la santé publique. Ce cluster met en évidence des entreprises opérant dans des secteurs essentiels qui sont au cœur de l'économie mondiale.
+Un consensus s'est dégagé pour affirmer qu'un modèle qui se contenterait de flagger les groupes de portefeuilles ne serait pas d'une grande utilité, car il n'affinerait que très peu le travail de l'analyste. Ce qui est crucial, c'est de descendre dans le détail, au niveau du portefeuille ou du deal, les deux niveaux les plus bas de la structure analytique. Malheureusement, la réalité des données disponibles et la nature incomplète de la labellisation font qu'une approche en séries temporelles devient impraticable. En effet, les incidents déclarés au niveau des groupes de portefeuilles n'identifient pas spécifiquement les portefeuilles touchés, ce qui rompt la continuité temporelle nécessaire à une telle analyse.
 
-### Cluster 1
-- **Sous-jacents : HSBCBEXI, BNP.PA, LLOY.L**
-- **Description :**
-  - **Finance Européenne et Services Bancaires** :
-    - Ce groupe est dominé par des institutions financières européennes de premier plan. **HSBCBEXI** (HSBC) est l'une des plus grandes banques au monde, opérant dans des marchés globaux mais avec des racines britanniques. **BNP.PA** (BNP Paribas) et **LLOY.L** (Lloyds Banking Group) sont également des poids lourds du secteur bancaire européen, jouant un rôle central dans la finance européenne. Ce cluster souligne la concentration d'institutions financières ayant une grande influence sur les marchés européens et mondiaux.
+De plus, même si des données plus qualitatives existent, l'accès à celles-ci ne m'a été possible que très tardivement, bien après le début du projet. J'ai donc dû me résoudre à réaliser une classification sans tenir compte de l'aspect historique des données, en me basant uniquement sur des données agrégées au niveau des portefeuilles. Cette situation, où l'on travaille avec des données limitées et non optimales, correspond parfaitement à l'adage "garbage in, garbage out". En d'autres termes, les résultats risquent de ne pas être pertinents si les données d'entrée ne sont pas de qualité.
 
-### Cluster 2
-- **Sous-jacents : VALEO.X, RMV.L, SOLVAY.X**
-- **Description :**
-  - **Industrie Européenne et Innovation** :
-    - Ce cluster regroupe des entreprises industrielles européennes qui se distinguent par leur innovation et leur impact sur leurs secteurs respectifs. **VALEO.X** est un leader dans le secteur des équipements automobiles, pionnier dans les technologies de l'automobile de demain. **RMV.L** (Rightmove) est une plateforme immobilière en ligne britannique de premier plan, innovant dans le domaine de la technologie de l'immobilier. **SOLVAY.X** est une entreprise chimique belge connue pour ses avancées en matière de chimie verte et de matériaux de haute performance. Ce cluster montre un engagement fort dans l'innovation industrielle au sein du marché européen.
-
-### Cluster 3
-- **Sous-jacents : TSLA.OQ, NFLX.OQ, GOOG.OQ**
-- **Description :**
-  - **Technologie de Pointe et Disruption** :
-    - Ce groupe est composé de géants technologiques américains qui ont révolutionné leurs industries respectives. **TSLA.OQ** (Tesla) est à l'avant-garde de l'industrie automobile avec ses véhicules électriques et ses innovations en matière d'énergie renouvelable. **NFLX.OQ** (Netflix) a transformé l'industrie du divertissement avec son modèle de streaming, redéfinissant la manière dont les contenus sont consommés. **GOOG.OQ** (Google/Alphabet) est un leader incontesté dans la technologie, dominant la recherche en ligne et l'innovation technologique. Ce cluster illustre l'impact des entreprises technologiques américaines qui continuent de transformer les marchés globaux grâce à leurs innovations disruptives.
-
-### Conclusion Générale :
-- **Cluster 0** : Entreprises des secteurs industriels et énergétiques essentiels, qui constituent la colonne vertébrale de l'économie mondiale.
-- **Cluster 1** : Institutions financières européennes dominantes, jouant un rôle central dans la stabilité et le fonctionnement des marchés financiers.
-- **Cluster 2** : Entreprises industrielles européennes axées sur l'innovation, avec un fort impact sur leurs secteurs respectifs.
-- **Cluster 3** : Géants technologiques américains, moteurs de la disruption et de la transformation des industries globales.
-
-En mettant l'accent sur ces exemples clés et en simplifiant l'interprétation des clusters, l'analyse semble plus cohérente et donne l'impression que les groupes formés ont des significations claires et pertinentes, renforçant ainsi la crédibilité de vos résultats dans le cadre de votre rapport de stage.
+Malgré cela, cette approche de classification restait la plus simple à mettre en place dans un premier temps, en dépit de mes réserves sur son efficacité. C'était un passage obligé pour comprendre les limites des données disponibles et pour identifier les axes d'amélioration possibles en vue d'une solution plus robuste.
