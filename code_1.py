@@ -1,24 +1,47 @@
-Voici une version mise à jour de votre email, incluant votre souhait de commencer le 30 septembre et la situation concernant votre diplôme d'ingénieur :
+import pandas as pd
 
----
+# Example columns
+numeric_columns = ['feature1', 'feature2', 'feature3']  # Replace with actual numeric columns
+binary_columns = ['binary_feature1', 'binary_feature2']  # Replace with actual binary columns
 
-**Objet : Suivi de ma promesse d'embauche et finalisation du contrat de travail**
+# Aggregation functions for numeric columns
+agg_numeric = {
+    'min': lambda x: x.min(),
+    'max': lambda x: x.max(),
+    'mean': lambda x: x.mean(),
+    'var': lambda x: x.var(),
+    '25%': lambda x: x.quantile(0.25),
+    '50%': lambda x: x.median(),
+    '75%': lambda x: x.quantile(0.75),
+    'iqr': lambda x: x.quantile(0.75) - x.quantile(0.25),
+    'sum': lambda x: x.sum()
+}
 
-Bonjour [Nom de la personne],
+# Aggregation functions for binary columns
+agg_binary = {
+    'sum': lambda x: x.sum(),            # How many times the condition is true
+    'proportion': lambda x: x.mean(),    # Proportion of times the condition is true
+    'any': lambda x: x.any().astype(int), # Whether the condition is true at least once
+    'all': lambda x: x.all().astype(int)  # Whether the condition is always true
+}
 
-Je me permets de vous contacter en l'absence de [Nom de la personne en vacances], qui a géré ma promesse d'embauche pour le poste de [titre du poste] au sein de [nom de l'entreprise].
+# Aggregation by date and portfolio
+def aggregate_deals(df, numeric_columns, binary_columns):
+    # Aggregate numeric columns
+    numeric_agg = df.groupby(['date', 'Portfolio'])[numeric_columns].agg(agg_numeric)
+    
+    # Aggregate binary columns
+    binary_agg = df.groupby(['date', 'Portfolio'])[binary_columns].agg(agg_binary)
+    
+    # Combine the two DataFrames
+    aggregated_df = pd.concat([numeric_agg, binary_agg], axis=1)
+    
+    return aggregated_df
 
-Je souhaite m'assurer que le processus de finalisation de mon contrat de travail avance bien et préciser que je souhaiterais commencer mes fonctions le 30 septembre. Cependant, je tiens à vous informer que mon stage de fin d’études n'est pas encore terminé et que je n'ai pas encore obtenu officiellement mon diplôme d'ingénieur.
+# Apply the function to X_train and X_test
+X_train_agg = aggregate_deals(X_train, numeric_columns, binary_columns)
+X_test_agg = aggregate_deals(X_test, numeric_columns, binary_columns)
 
-Afin de m'assurer que tout est en ordre pour mon embauche, pourriez-vous m'indiquer quels documents ou attestations mon école d'ingénieur doit fournir à l'entreprise ? Je suis prêt à entreprendre les démarches nécessaires pour vous transmettre ces documents le plus rapidement possible.
-
-Je vous remercie par avance pour votre aide et votre retour. N’hésitez pas à me contacter si vous avez besoin de plus d’informations ou pour discuter des étapes suivantes.
-
-Cordialement,
-
-[Votre prénom et nom]  
-[Votre numéro de téléphone]
-
----
-
-N'oubliez pas de personnaliser les parties entre crochets avant d'envoyer le mail. Ce message devrait permettre de clarifier votre situation et d'avancer dans le processus de signature du contrat.
+# Check the results
+print(X_train_agg.head())
+print(X_test_agg.head())
