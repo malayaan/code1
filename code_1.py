@@ -1,54 +1,52 @@
 import pandas as pd
+import numpy as np
 
-# Example columns
-numeric_columns = ['feature1', 'feature2', 'feature3']  # Replace with actual numeric columns
-binary_columns = ['binary_feature1', 'binary_feature2']  # Replace with actual binary columns
-
-# Aggregation functions for numeric columns
-agg_numeric = {
-    'min': 'min',
-    'max': 'max',
-    'mean': 'mean',
-    'var': 'var',
-    '25%': lambda x: x.quantile(0.25),
-    '50%': 'median',
-    '75%': lambda x: x.quantile(0.75),
-    'iqr': lambda x: x.quantile(0.75) - x.quantile(0.25),
-    'sum': 'sum'
+# Exemple de données
+data = {
+    'deal_id': [1, 1, 2, 2, 3, 3],
+    'Portfolio': ['A', 'A', 'B', 'B', 'C', 'C'],
+    'date': ['2021-01-01', '2021-01-01', '2021-01-02', '2021-01-02', '2021-01-03', '2021-01-03'],
+    'feature1': [100, 150, 200, 250, 300, 350],
+    'feature2': [20, 30, 40, 50, 60, 70],
+    'binary1': [0, 1, 1, 0, 1, 1],
+    'binary2': [1, 0, 0, 1, 0, 1]
 }
 
-# Aggregation functions for binary columns
-agg_binary = {
-    'sum': 'sum',              # How many times the condition is true
-    'proportion': 'mean',       # Proportion of times the condition is true
-    'any': lambda x: x.any().astype(int),  # Whether the condition is true at least once
-    'all': lambda x: x.all().astype(int)   # Whether the condition is always true
+df = pd.DataFrame(data)
+
+# Définir les colonnes pour les différentes agrégations
+numeric_features = ['feature1', 'feature2']
+binary_features = ['binary1', 'binary2']
+
+# Fonctions d'agrégation pour les features numériques
+aggregations_numeric = {
+    'mean': np.mean,
+    'max': np.max,
+    'min': np.min,
+    'var': np.var,
+    'q25': lambda x: x.quantile(0.25),
+    'q75': lambda x: x.quantile(0.75)
 }
 
-# Aggregation by date and portfolio
-def aggregate_deals(df, numeric_columns, binary_columns):
-    # Check if the numeric columns exist in the dataframe
-    numeric_columns = [col for col in numeric_columns if col in df.columns]
-    binary_columns = [col for col in binary_columns if col in df.columns]
+# Fonctions d'agrégation pour les features binaires
+aggregations_binary = {
+    'sum': np.sum,
+    'mean': np.mean,
+    'proportion': lambda x: np.mean(x == 1)
+}
 
-    if not numeric_columns and not binary_columns:
-        raise ValueError("No valid columns to aggregate.")
+# Aggréger les données numériques
+for feature in numeric_features:
+    for agg_name, agg_func in aggregations_numeric.items():
+        df[f'{feature}_{agg_name}'] = df.groupby(['date', 'Portfolio'])[feature].transform(agg_func)
 
-    # Aggregate numeric columns
-    numeric_agg = df.groupby(['pricingdate', 'Portfolio'])[numeric_columns].agg(agg_numeric)
-    
-    # Aggregate binary columns
-    binary_agg = df.groupby(['pricingdate', 'Portfolio'])[binary_columns].agg(agg_binary)
-    
-    # Combine the two DataFrames
-    aggregated_df = pd.concat([numeric_agg, binary_agg], axis=1)
-    
-    return aggregated_df
+# Aggréger les données binaires
+for feature in binary_features:
+    for agg_name, agg_func in aggregations_binary.items():
+        df[f'{feature}_{agg_name}'] = df.groupby(['date', 'Portfolio'])[feature].transform(agg_func)
 
-# Apply the function to X_train and X_test
-X_train_agg = aggregate_deals(X_train, numeric_columns, binary_columns)
-X_test_agg = aggregate_deals(X_test, numeric_columns, binary_columns)
+# Sélectionner une ligne par groupe
+df_unique = df.drop_duplicates(subset=['date', 'Portfolio']).reset_index(drop=True)
 
-# Check the results
-print(X_train_agg.head())
-print(X_test_agg.head())
+# Afficher le résultat
+print(df_unique)
